@@ -6,8 +6,6 @@
 
 namespace memorypool {
 
-constexpr size_t FREE_LIST_SIZE = 1024;
-
 class ThreadCache {
 public:
     static ThreadCache& getInstance() {
@@ -18,17 +16,22 @@ public:
     void* allocate(size_t size);
     void deallocate(void* ptr, size_t size);
 
-private:
-    ThreadCache() = default;
-    ~ThreadCache();
+public:
     ThreadCache(const ThreadCache&) = delete;
     ThreadCache& operator=(const ThreadCache&) = delete;
     ThreadCache(ThreadCache&&) = delete;
     ThreadCache& operator=(ThreadCache&&) = delete;
 
 private:
-    std::array<std::byte*, FREE_LIST_SIZE> freeList = {};
-    std::array<size_t, FREE_LIST_SIZE> freeListSize = {};
+    ThreadCache() {
+        threshold_.fill(DEFAULT_THRESHOLD);
+    };
+    ~ThreadCache();
+
+private:
+    std::array<std::byte*, FREE_LIST_SIZE> freeList_ = {};
+    std::array<size_t, FREE_LIST_SIZE> freeListSize_ = {};
+    std::array<size_t, FREE_LIST_SIZE> threshold_ = {};
 };
 
 }
