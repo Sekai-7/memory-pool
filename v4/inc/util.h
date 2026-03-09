@@ -12,6 +12,10 @@ constexpr size_t DEFAULT_THRESHOLD = 8;
 
 constexpr size_t FREE_LIST_SIZE = 1024;
 
+constexpr size_t PAGE_SIZE = 4096;
+
+constexpr size_t SPAN_SIZE = 8;
+
 inline size_t align(size_t size) {
     return (size + ALIGNLEN - 1) & ~(ALIGNLEN - 1);
 }
