@@ -3,14 +3,11 @@
 
 #include "util.h"
 
-#include <sys/mman.h>
 #include <cstddef>
 #include <array>
 #include <memory>
 #include <cstdint>
 #include <atomic>
-#include <new>
-#include <mutex>
 
 namespace memorypool {
 
@@ -21,8 +18,8 @@ public:
         return instance;
     }
 
-    std::byte* allocate(size_t, size_t);
-    void deallocate(std::byte*, size_t);
+    std::byte* allocate(size_t size, size_t count);
+    void deallocate(std::byte* list_head, size_t size, size_t count);
 
 public:
     CentralCache(const CentralCache&) = delete;
@@ -31,15 +28,19 @@ public:
     CentralCache& operator=(CentralCache&&) = delete;
 
 private:
-    CentralCache() = default;
-    ~CentralCache();
+    CentralCache() {
+        for (auto& lock : locks_) {
+            lock.clear();
+        }
+    }
+    ~CentralCache() = default;
+
+    Span* fetchSpanFromPageCache(int index, size_t objSize);
 
 private:
-    std::array<std::byte*, FREE_LIST_SIZE> centralFreeList_;
-    std::array<size_t, FREE_LIST_SIZE> centralFreeListSize_;
-    std::array<std::atomic_flag, FREE_LIST_SIZE> locks_;
+    std::array<SpanList, FREE_LIST_SIZE> nonempty_;
 
-    RadixTreePageMap radixTreePageMap_;
+    std::array<std::atomic_flag, FREE_LIST_SIZE> locks_;
 };
 
 }

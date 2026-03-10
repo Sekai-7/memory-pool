@@ -15,15 +15,18 @@ void* ThreadCache::allocate(size_t size) {
     }
 
     if (freeList_[index] == nullptr) {
+        int count = threshold_[index];
+        
         // 从CentralCache申请内存并且分割
-        auto* applyMemory = CentralCache::getInstance().allocate(alignSize, threshold_[index]);
+        // 中心缓存的分配采取尽力
+        auto* applyMemory = CentralCache::getInstance().allocate(alignSize, count);
         
         if (applyMemory == nullptr) {
             return nullptr;
         }
 
         freeList_[index] = applyMemory;
-        freeListSize_[index] = threshold_[index];
+        freeListSize_[index] = count;
 
         threshold_[index] *= 2;
     }

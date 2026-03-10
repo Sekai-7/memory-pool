@@ -1,6 +1,8 @@
 #ifndef _THREAD_CACHE_H_
 #define _THREAD_CACHE_H_
 
+#include "util.h"
+
 #include <array>
 #include <cstddef>
 

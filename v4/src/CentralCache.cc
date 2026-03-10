@@ -6,67 +6,58 @@
 namespace memorypool {
 
 std::byte* CentralCache::allocate(size_t size, size_t count) {
-    size_t objSize = align(size);
-    int index = getListIndex(objSize);
+    size_t alignSize = align(size);
+    auto index = getListIndex(alignSize);
+
     if (index >= FREE_LIST_SIZE) {
         return nullptr;
     }
 
     while (locks_[index].test_and_set(std::memory_order_acquire)) {
-        std::this_thread::yield(); 
+        std::this_thread::yield();
     }
 
-    if (count > centralFreeListSize_[index]) {
+    Span* span = nonempty_[index].front();
+    if (span == nullptr) {
         locks_[index].clear(std::memory_order_release);
 
-        size_t bytesNeeded = count * objSize;
-        size_t pageCount = (bytesNeeded + PAGE_SIZE - 1) / PAGE_SIZE;
+        span = fetchSpanFromPageCache(index, alignSize);
 
-        auto* applySpan = PageCache::getInstance().allocate(pageCount);
-        if (applySpan == nullptr) {
+        if (span == nullptr) {
             return nullptr;
         }
 
-        std::byte* start = static_cast<std::byte*>(applySpan->ptr);
-        size_t totalCount = applySpan->totalSize;
-
-        for (size_t i = 0; i < totalCount - 1; ++i) {
-            std::byte* current = start + i * objSize;
-            std::byte* nextNode = start + (i + 1) * objSize;
-            *reinterpret_cast<std::byte**>(current) = nextNode;
-        }
-
-        std::byte* tail = start + (totalCount - 1) * objSize;
-        *reinterpret_cast<std::byte**>(tail) = nullptr;
-
         while (locks_[index].test_and_set(std::memory_order_acquire)) {
-            std::this_thread::yield(); 
+            std::this_thread::yield();
         }
-
-        *reinterpret_cast<std::byte**>(tail) = centralFreeList_[index];
-        centralFreeList_[index] = start;
-        centralFreeListSize_[index] += totalCount; 
-    } 
-
-    auto* ret = centralFreeList_[index];
-    auto next = centralFreeList_[index];
-    
-    size_t traverseCount = count; 
-    while (--traverseCount) {
-        next = *(reinterpret_cast<std::byte**>(next));
+        nonempty_[index].pushFront(span);
     }
 
-    centralFreeList_[index] = *(reinterpret_cast<std::byte**>(next));
-    *(reinterpret_cast<std::byte**>(next)) = nullptr;
-    
-    centralFreeListSize_[index] -= count;
+    std::byte* head = span->freeList;
+    std::byte* tail = head;
+    size_t actualCount = 1;
+
+    // 按尽力语义截取链表
+    while (actualCount < count && *reinterpret_cast<std::byte**>(tail) != nullptr) {
+        tail = *reinterpret_cast<std::byte**>(tail);
+        actualCount++;
+    }
+
+    // 更新 Span 元数据
+    span->freeList = *reinterpret_cast<std::byte**>(tail);
+    *reinterpret_cast<std::byte**>(tail) = nullptr; 
+    span->useCount += actualCount;                  
+
+    if (span->freeList == nullptr) {
+        nonempty_[index].remove(span);
+    }
 
     locks_[index].clear(std::memory_order_release);
 
-    return ret;
+    count = actualCount;
 }
 
-void CentralCache::deallocate(std::byte*, size_t) {
+void CentralCache::deallocate(std::byte*, size_t, size_t) {
 
 }
 
