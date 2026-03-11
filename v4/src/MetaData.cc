@@ -8,9 +8,11 @@
 namespace memorypool {
 
 void RadixTreePageMap::setSpan(uintptr_t key, Span* span) {
-    size_t i1 = (key >> (BITS_PER_LEVEL * 2)) & (LEVEL_LENGTH - 1);
-    size_t i2 = (key >> BITS_PER_LEVEL) & (LEVEL_LENGTH - 1);
-    size_t i3 = key & (LEVEL_LENGTH - 1);
+    auto pageId = key >> PAGE_SHIFT;
+
+    size_t i1 = (pageId >> (BITS_PER_LEVEL * 2)) & (LEVEL_LENGTH - 1);
+    size_t i2 = (pageId >> BITS_PER_LEVEL) & (LEVEL_LENGTH - 1);
+    size_t i3 = pageId & (LEVEL_LENGTH - 1);
 
     // 1. 确保 L2 节点存在
     Node* node = root_[i1].load(std::memory_order_acquire);
@@ -49,9 +51,11 @@ void RadixTreePageMap::setSpan(uintptr_t key, Span* span) {
 }
 
 Span* RadixTreePageMap::getSpan(uintptr_t key) {
-    size_t i1 = (key >> (BITS_PER_LEVEL * 2)) & (LEVEL_LENGTH - 1);
-    size_t i2 = (key >> BITS_PER_LEVEL) & (LEVEL_LENGTH - 1);
-    size_t i3 = key & (LEVEL_LENGTH - 1);
+    auto pageId = key >> PAGE_SHIFT;
+
+    size_t i1 = (pageId >> (BITS_PER_LEVEL * 2)) & (LEVEL_LENGTH - 1);
+    size_t i2 = (pageId >> BITS_PER_LEVEL) & (LEVEL_LENGTH - 1);
+    size_t i3 = pageId & (LEVEL_LENGTH - 1);
 
     Node* node = root_[i1].load(std::memory_order_acquire);
     if (!node) return nullptr;

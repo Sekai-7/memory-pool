@@ -123,12 +123,6 @@ private:
     std::mutex mutex_;
 };
 
-constexpr size_t PAGE_SHIFT = 12;
-constexpr size_t BITS_PER_LEVEL = 12;
-constexpr size_t LEVEL_LENGTH = 1ULL << BITS_PER_LEVEL;
-
-
-
 class Span {
 public:
 void* ptr{nullptr};         // Span 管理的起始物理页地址

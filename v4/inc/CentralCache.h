@@ -18,7 +18,7 @@ public:
         return instance;
     }
 
-    std::byte* allocate(size_t size, size_t count);
+    std::byte* allocate(size_t size, size_t& count);
     void deallocate(std::byte* list_head, size_t size, size_t count);
 
 public:
