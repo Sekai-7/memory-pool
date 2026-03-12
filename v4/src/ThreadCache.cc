@@ -15,7 +15,7 @@ void* ThreadCache::allocate(size_t size) {
     }
 
     if (freeList_[index] == nullptr) {
-        int count = threshold_[index];
+        size_t count = threshold_[index];
         
         // 从CentralCache申请内存并且分割
         // 中心缓存的分配采取尽力
@@ -60,7 +60,7 @@ void ThreadCache::deallocate(void* ptr, size_t size) {
             }
             next = *(reinterpret_cast<std::byte**>(next));
         }
-        CentralCache::getInstance().deallocate(freeList_[index], deallocateSize);
+        CentralCache::getInstance().deallocate(freeList_[index], index, freeListSize_[index] / 2);
         freeList_[index] = next;
         freeListSize_[index] -= deallocateSize;
         threshold_[index] /= 2;
@@ -72,7 +72,7 @@ void ThreadCache::deallocate(void* ptr, size_t size) {
 ThreadCache::~ThreadCache() {
     for (int i = 0; i < FREE_LIST_SIZE; ++i) {
         if (freeList_[i] != nullptr) {
-            CentralCache::getInstance().deallocate(freeList_[i], freeListSize_[i]);
+            CentralCache::getInstance().deallocate(freeList_[i], i, freeListSize_[i]);
         }
     }
     return;

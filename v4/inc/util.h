@@ -7,6 +7,8 @@
 
 namespace memorypool {
 
+constexpr size_t MAX_PAGES = 128;
+
 constexpr size_t ALIGNLEN = sizeof(void*);
 
 constexpr size_t DEFAULT_THRESHOLD = 8;
@@ -125,7 +127,7 @@ private:
 
 class Span {
 public:
-void* ptr{nullptr};         // Span 管理的起始物理页地址
+    void* ptr{nullptr};         // Span 管理的起始物理页地址
     size_t pageCount{0};        // Span 包含的连续物理页数量
     size_t objSize{0};          // 切分的目标对象大小 (Size Class)
     

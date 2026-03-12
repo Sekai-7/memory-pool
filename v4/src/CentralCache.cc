@@ -59,13 +59,12 @@ std::byte* CentralCache::allocate(size_t size, size_t& count) {
     return head;
 }
 
-void CentralCache::deallocate(std::byte* listHead, size_t size, size_t count) {
+void CentralCache::deallocate(std::byte* listHead, size_t idx, size_t count) {
     if (listHead == nullptr) {
         return;
     }
 
-    size_t alignSize = align(size);
-    auto index = getListIndex(alignSize);
+    auto index = idx;
 
     if (index >= FREE_LIST_SIZE) {
         return;
@@ -77,7 +76,7 @@ void CentralCache::deallocate(std::byte* listHead, size_t size, size_t count) {
 
     std::byte* current = listHead;
 
-    while (current != nullptr) {
+    while (count--) {
         std::byte* next = *reinterpret_cast<std::byte**>(current);
 
         Span* span = RadixTreePageMap::getInstance().getSpan(reinterpret_cast<uintptr_t>(current));
@@ -110,11 +109,35 @@ void CentralCache::deallocate(std::byte* listHead, size_t size, size_t count) {
 }
 
 Span* CentralCache::fetchSpanFromPageCache(int index, size_t objSize) {
+    // 由于现在设置的内存比较小，直接默认分配一页内存
+    int pageCount = 1;
+
+    Span* span = PageCache::getInstance().allocate(pageCount);
+    if (span == nullptr) {
+        return nullptr;
+    }
+
+    pageCount = span->pageCount;
+
+    std::byte* current = static_cast<std::byte*>(span->ptr);
+    span->freeList = current;
+    span->useCount = 0;
+    span->objSize = objSize;
+
+    size_t sum = pageCount * PAGE_SIZE;
+
+    for (size_t i = objSize; i < sum; i += objSize) {
+        *reinterpret_cast<std::byte**>(current) = current + objSize;
+        current += objSize; 
+    }
+    *reinterpret_cast<std::byte**>(current) = nullptr;
+
+    for (size_t i = 0; i < pageCount; ++i) {
+        RadixTreePageMap::getInstance().setSpan(reinterpret_cast<uintptr_t>(static_cast<std::byte*>(span->ptr) + i * PAGE_SIZE), span);
+    }
+
+
+    return span;
 }
-
-CentralCache::~CentralCache() {
-
-}
-
 
 }

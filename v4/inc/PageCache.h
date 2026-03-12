@@ -3,10 +3,8 @@
 
 #include "util.h"
 
-#include <sys/mman.h>
-#include <cstddef>
-#include <atomic>
 #include <mutex>
+#include <array>
 
 namespace memorypool {
 
@@ -19,7 +17,7 @@ public:
 
     Span* allocate(size_t);
 
-    void deallocate(void*);
+    void deallocate(Span*);
 
 public:
     PageCache(const PageCache&) = delete;
@@ -29,7 +27,15 @@ public:
 
 private:
     PageCache() = default;
-    ~PageCache();
+    ~PageCache() = default;
+
+private:
+    Span* requestFromOS(size_t);
+
+private:
+    std::array<SpanList, MAX_PAGES> spanLists_;
+
+    std::mutex page_mutex_;
 };
 
 }
