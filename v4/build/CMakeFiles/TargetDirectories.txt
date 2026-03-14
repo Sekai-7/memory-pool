@@ -1,0 +1,3 @@
+/home/sekai/Project/MemoryPool/v4/build/CMakeFiles/memory_pool.dir
+/home/sekai/Project/MemoryPool/v4/build/CMakeFiles/edit_cache.dir
+/home/sekai/Project/MemoryPool/v4/build/CMakeFiles/rebuild_cache.dir

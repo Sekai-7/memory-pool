@@ -35,7 +35,7 @@ private:
     }
     ~CentralCache() = default;
 
-    Span* fetchSpanFromPageCache(int index, size_t objSize);
+    Span* fetchSpanFromPageCache(size_t objSize);
 
 private:
     std::array<SpanList, FREE_LIST_SIZE> nonempty_;

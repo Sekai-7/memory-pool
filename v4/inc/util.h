@@ -4,6 +4,8 @@
 #include <sys/mman.h>
 #include <cstddef>
 #include <cstdint>
+#include <atomic>
+#include <mutex>
 
 namespace memorypool {
 
@@ -49,6 +51,7 @@ inline uint8_t getListIndex(size_t size) {
     } else if (alignSize == 1024) {
         return 7;
     }
+    return 255;
 }
 
 template<typename T, size_t ChunkSize = 64 * 1024>
@@ -62,15 +65,14 @@ public:
         std::lock_guard<std::mutex> lock(mutex_);
 
         if (freeList_ != nullptr) {
-            std::byte* ret = reinterpret_cast<T*>(freeList_);
+            std::byte* ret = freeList_;
             freeList_ = *(reinterpret_cast<std::byte**>(freeList_));
             return new(ret) T();
         }
 
-        size_t allocSize = sizeof(T);
-        allocSize = (allocSize + sizeof(void*) - 1) & ~(sizeof(void*) - 1);
+        static constexpr size_t allocSize = (sizeof(T) + alignof(T) - 1) & ~(alignof(T) - 1);
 
-        if (currentChunk_ == nullptr || (chunkOffSet_ + allocSize) >= ChunkSize) {
+        if (currentChunk_ == nullptr || (chunkOffSet_ + allocSize) > ChunkSize) {
             auto ret = allocateNewChunk();
             if (ret == false) {
                 return nullptr;
@@ -92,9 +94,9 @@ public:
 
         std::lock_guard<std::mutex> lock(mutex_);
 
-        *reinterpret_cast<void**>(ptr) = freeList_;
+        *reinterpret_cast<std::byte**>(ptr) = freeList_;
 
-        freeList_ = ptr;
+        freeList_ = reinterpret_cast<std::byte*>(ptr);
     }
 
 public:
@@ -105,7 +107,7 @@ public:
 
 private:
     bool allocateNewChunk() {
-        void* memory = mmap(nullptr, chunkSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        void* memory = mmap(nullptr, ChunkSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
         if (memory == MAP_FAILED) {
             return false;
@@ -116,11 +118,14 @@ private:
         return true;
     }
 
-private:
-    std::byte* currentChunk_;
-    size_t chunkOffSet_;
+    MetaDataAllocator() = default;
+    ~MetaDataAllocator() = default;
 
-    std::byte* freeList_;
+private:
+    std::byte* currentChunk_ = nullptr;
+    size_t chunkOffSet_ = 0;
+
+    std::byte* freeList_ = nullptr;
 
     std::mutex mutex_;
 };

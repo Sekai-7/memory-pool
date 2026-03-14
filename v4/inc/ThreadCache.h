@@ -28,7 +28,7 @@ private:
     ThreadCache() {
         threshold_.fill(DEFAULT_THRESHOLD);
     };
-    ~ThreadCache() = default;
+    ~ThreadCache();
 
 private:
     std::array<std::byte*, FREE_LIST_SIZE> freeList_ = {};

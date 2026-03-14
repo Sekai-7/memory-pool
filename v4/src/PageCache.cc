@@ -10,7 +10,7 @@ Span* PageCache::allocate(size_t pageCount) {
         if (pageCount > MAX_PAGES) {
             return nullptr;
         }
-        int idx = pageCount - 1;
+        size_t idx = pageCount - 1;
         while (idx < MAX_PAGES && spanLists_[idx].empty()) {
             ++idx;
         }
@@ -78,8 +78,8 @@ Span* PageCache::requestFromOS(size_t pageCount) {
     return nullptr;
 }
 
-PageCache::~PageCache() {
-    return;
-}
+// PageCache::~PageCache() {
+    // return;
+// }
 
 }

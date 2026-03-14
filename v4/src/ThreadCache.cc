@@ -70,7 +70,7 @@ void ThreadCache::deallocate(void* ptr, size_t size) {
 }
 
 ThreadCache::~ThreadCache() {
-    for (int i = 0; i < FREE_LIST_SIZE; ++i) {
+    for (size_t i = 0; i < FREE_LIST_SIZE; ++i) {
         if (freeList_[i] != nullptr) {
             CentralCache::getInstance().deallocate(freeList_[i], i, freeListSize_[i]);
         }
