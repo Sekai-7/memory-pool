@@ -31,7 +31,7 @@ inline size_t align(size_t size) {
     return (size + ALIGNLEN - 1) & ~(ALIGNLEN - 1);
 }
 
-inline uint8_t getListIndex(size_t size) {
+inline uint16_t getListIndex(size_t size) {
     // return align(size) / ALIGNLEN - 1;
     auto alignSize = align(size);
     if (alignSize == 8) {
@@ -51,7 +51,7 @@ inline uint8_t getListIndex(size_t size) {
     } else if (alignSize == 1024) {
         return 7;
     }
-    return 255;
+    return FREE_LIST_SIZE;
 }
 
 template<typename T, size_t ChunkSize = 64 * 1024>
@@ -230,9 +230,9 @@ private:
 
 using SpanAllocator = MetaDataAllocator<Span, 2 * 1024 * 1024>;
 
-using NodeAllocator = MetaDataAllocator<Node, 16 * 1024>;
+using NodeAllocator = MetaDataAllocator<Node, 1024 * 1024>;
 
-using LeafNodeAllocator = MetaDataAllocator<LeafNode, 16 * 1024>;
+using LeafNodeAllocator = MetaDataAllocator<LeafNode, 1024 * 1024>;
 
 }
 
