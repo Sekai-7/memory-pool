@@ -1,8 +1,6 @@
-CMakeFiles/memory_pool.dir/src/main.cc.o: \
- /home/sekai/Project/MemoryPool/v4/src/main.cc /usr/include/stdc-predef.h \
- /home/sekai/Project/MemoryPool/v4/inc/Allocator.h \
- /home/sekai/Project/MemoryPool/v4/inc/ThreadCache.h \
- /home/sekai/Project/MemoryPool/v4/inc/util.h \
+CMakeFiles/memory_pool.dir/src/main.cc.o: /app/v4/src/main.cc \
+ /usr/include/stdc-predef.h /app/v4/inc/Allocator.h \
+ /app/v4/inc/ThreadCache.h /app/v4/inc/util.h \
  /usr/include/x86_64-linux-gnu/sys/mman.h /usr/include/features.h \
  /usr/include/features-time64.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \

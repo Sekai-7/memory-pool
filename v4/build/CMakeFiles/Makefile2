@@ -54,10 +54,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/sekai/Project/MemoryPool/v4
+CMAKE_SOURCE_DIR = /app/v4
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/sekai/Project/MemoryPool/v4/build
+CMAKE_BINARY_DIR = /app/v4/build
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -81,14 +81,14 @@ clean: CMakeFiles/memory_pool.dir/clean
 CMakeFiles/memory_pool.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool.dir/build.make CMakeFiles/memory_pool.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool.dir/build.make CMakeFiles/memory_pool.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/sekai/Project/MemoryPool/v4/build/CMakeFiles --progress-num=1,2,3,4,5,6 "Built target memory_pool"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/app/v4/build/CMakeFiles --progress-num=1,2,3,4,5,6 "Built target memory_pool"
 .PHONY : CMakeFiles/memory_pool.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/memory_pool.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/sekai/Project/MemoryPool/v4/build/CMakeFiles 6
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/v4/build/CMakeFiles 6
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/memory_pool.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/sekai/Project/MemoryPool/v4/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /app/v4/build/CMakeFiles 0
 .PHONY : CMakeFiles/memory_pool.dir/rule
 
 # Convenience name for target.

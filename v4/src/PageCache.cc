@@ -5,6 +5,9 @@
 namespace memorypool {
 
 Span* PageCache::allocate(size_t pageCount) {
+    if (pageCount == 0) {
+        return nullptr;
+    }
     {
         std::lock_guard<std::mutex> lock(page_mutex_);
         if (pageCount > MAX_PAGES) {

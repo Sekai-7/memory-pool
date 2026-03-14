@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/sekai/Project/MemoryPool/v4/inc
+CXX_INCLUDES = -I/app/v4/inc
 
-CXX_FLAGS = -g -std=gnu++23 -Wall -Wextra -Werror
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++23 -Wall -Wextra -Werror
 
