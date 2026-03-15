@@ -110,7 +110,7 @@ void CentralCache::deallocate(std::byte* listHead, size_t idx, size_t count) {
 
 Span* CentralCache::fetchSpanFromPageCache(size_t objSize) {
     // 由于现在设置的内存比较小，直接默认分配一页内存
-    size_t pageCount = 1;
+    size_t pageCount = 8;
 
     Span* span = PageCache::getInstance().allocate(pageCount);
     if (span == nullptr) {

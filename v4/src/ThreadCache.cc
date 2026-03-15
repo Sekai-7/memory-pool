@@ -53,7 +53,8 @@ void ThreadCache::deallocate(void* ptr, size_t size) {
     if (freeListSize_[index] >= threshold_[index]) {
         size_t deallocateSize = freeListSize_[index] / 2;
         auto* next = freeList_[index];
-        while (deallocateSize--) {
+        size_t count = deallocateSize;
+        while (count--) {
             if (next == nullptr) {
                 // 要做额外处理
                 return;
