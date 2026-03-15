@@ -529,3 +529,852 @@ events:
       
       
 ...
+
+---
+events:
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/CheckCSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/FindThreads.cmake:97 (CHECK_C_SOURCE_COMPILES)"
+      - "/usr/share/cmake-3.28/Modules/FindThreads.cmake:163 (_threads_check_libc)"
+      - "build/_deps/googletest-src/googletest/cmake/internal_utils.cmake:66 (find_package)"
+      - "build/_deps/googletest-src/googletest/CMakeLists.txt:83 (config_compiler_and_linker)"
+    checks:
+      - "Performing Test CMAKE_HAVE_LIBC_PTHREAD"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-PBwOjs"
+      binary: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-PBwOjs"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_C_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "CMAKE_HAVE_LIBC_PTHREAD"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-PBwOjs'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_f4a0b/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_f4a0b.dir/build.make CMakeFiles/cmTC_f4a0b.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-PBwOjs'
+        Building C object CMakeFiles/cmTC_f4a0b.dir/src.c.o
+        /usr/bin/cc -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_f4a0b.dir/src.c.o -c /app/v4/build/CMakeFiles/CMakeScratch/TryCompile-PBwOjs/src.c
+        Linking C executable cmTC_f4a0b
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f4a0b.dir/link.txt --verbose=1
+        /usr/bin/cc CMakeFiles/cmTC_f4a0b.dir/src.c.o -o cmTC_f4a0b 
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-PBwOjs'
+        
+      exitCode: 0
+...
+
+---
+events:
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/CheckLibraryExists.cmake:69 (try_compile)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:125 (check_library_exists)"
+    checks:
+      - "Looking for shm_open in rt"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-H5YiXY"
+      binary: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-H5YiXY"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_C_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "HAVE_LIB_RT"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-H5YiXY'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_49b94/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_49b94.dir/build.make CMakeFiles/cmTC_49b94.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-H5YiXY'
+        Building C object CMakeFiles/cmTC_49b94.dir/CheckFunctionExists.c.o
+        /usr/bin/cc   -DCHECK_FUNCTION_EXISTS=shm_open -o CMakeFiles/cmTC_49b94.dir/CheckFunctionExists.c.o -c /app/v4/build/CMakeFiles/CMakeScratch/TryCompile-H5YiXY/CheckFunctionExists.c
+        Linking C executable cmTC_49b94
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_49b94.dir/link.txt --verbose=1
+        /usr/bin/cc  -DCHECK_FUNCTION_EXISTS=shm_open CMakeFiles/cmTC_49b94.dir/CheckFunctionExists.c.o -o cmTC_49b94  -lrt 
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-H5YiXY'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXCompilerFlag.cmake:34 (cmake_check_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/cmake/AddCXXCompilerFlag.cmake:34 (check_cxx_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:174 (add_cxx_compiler_flag)"
+    checks:
+      - "Performing Test HAVE_CXX_FLAG_WALL"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-Ef7T9E"
+      binary: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-Ef7T9E"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "HAVE_CXX_FLAG_WALL"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-Ef7T9E'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_31684/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_31684.dir/build.make CMakeFiles/cmTC_31684.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-Ef7T9E'
+        Building CXX object CMakeFiles/cmTC_31684.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WALL  -Wall -std=c++11   -Wall -o CMakeFiles/cmTC_31684.dir/src.cxx.o -c /app/v4/build/CMakeFiles/CMakeScratch/TryCompile-Ef7T9E/src.cxx
+        Linking CXX executable cmTC_31684
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_31684.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall CMakeFiles/cmTC_31684.dir/src.cxx.o -o cmTC_31684 
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-Ef7T9E'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXCompilerFlag.cmake:34 (cmake_check_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/cmake/AddCXXCompilerFlag.cmake:34 (check_cxx_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:175 (add_cxx_compiler_flag)"
+    checks:
+      - "Performing Test HAVE_CXX_FLAG_WEXTRA"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-jeGFNY"
+      binary: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-jeGFNY"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "  -Wall"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "HAVE_CXX_FLAG_WEXTRA"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-jeGFNY'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_068f5/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_068f5.dir/build.make CMakeFiles/cmTC_068f5.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-jeGFNY'
+        Building CXX object CMakeFiles/cmTC_068f5.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WEXTRA  -Wall  -Wextra -std=c++11   -Wextra -o CMakeFiles/cmTC_068f5.dir/src.cxx.o -c /app/v4/build/CMakeFiles/CMakeScratch/TryCompile-jeGFNY/src.cxx
+        Linking CXX executable cmTC_068f5
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_068f5.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra CMakeFiles/cmTC_068f5.dir/src.cxx.o -o cmTC_068f5 
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-jeGFNY'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXCompilerFlag.cmake:34 (cmake_check_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/cmake/AddCXXCompilerFlag.cmake:34 (check_cxx_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:176 (add_cxx_compiler_flag)"
+    checks:
+      - "Performing Test HAVE_CXX_FLAG_WSHADOW"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-Y4QwXJ"
+      binary: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-Y4QwXJ"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "  -Wall  -Wextra"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "HAVE_CXX_FLAG_WSHADOW"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-Y4QwXJ'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_e89bc/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_e89bc.dir/build.make CMakeFiles/cmTC_e89bc.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-Y4QwXJ'
+        Building CXX object CMakeFiles/cmTC_e89bc.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WSHADOW  -Wall  -Wextra  -Wshadow -std=c++11   -Wshadow -o CMakeFiles/cmTC_e89bc.dir/src.cxx.o -c /app/v4/build/CMakeFiles/CMakeScratch/TryCompile-Y4QwXJ/src.cxx
+        Linking CXX executable cmTC_e89bc
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e89bc.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow CMakeFiles/cmTC_e89bc.dir/src.cxx.o -o cmTC_e89bc 
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-Y4QwXJ'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXCompilerFlag.cmake:34 (cmake_check_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/cmake/AddCXXCompilerFlag.cmake:34 (check_cxx_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:177 (add_cxx_compiler_flag)"
+    checks:
+      - "Performing Test HAVE_CXX_FLAG_WFLOAT_EQUAL"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-NENEDP"
+      binary: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-NENEDP"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "HAVE_CXX_FLAG_WFLOAT_EQUAL"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-NENEDP'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_34ae0/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_34ae0.dir/build.make CMakeFiles/cmTC_34ae0.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-NENEDP'
+        Building CXX object CMakeFiles/cmTC_34ae0.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WFLOAT_EQUAL  -Wall  -Wextra  -Wshadow  -Wfloat-equal -std=c++11   -Wfloat-equal -o CMakeFiles/cmTC_34ae0.dir/src.cxx.o -c /app/v4/build/CMakeFiles/CMakeScratch/TryCompile-NENEDP/src.cxx
+        Linking CXX executable cmTC_34ae0
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_34ae0.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal CMakeFiles/cmTC_34ae0.dir/src.cxx.o -o cmTC_34ae0 
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-NENEDP'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXCompilerFlag.cmake:34 (cmake_check_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/cmake/AddCXXCompilerFlag.cmake:34 (check_cxx_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:178 (add_cxx_compiler_flag)"
+    checks:
+      - "Performing Test HAVE_CXX_FLAG_WOLD_STYLE_CAST"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-mmuUsE"
+      binary: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-mmuUsE"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "HAVE_CXX_FLAG_WOLD_STYLE_CAST"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-mmuUsE'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_0c235/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_0c235.dir/build.make CMakeFiles/cmTC_0c235.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-mmuUsE'
+        Building CXX object CMakeFiles/cmTC_0c235.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WOLD_STYLE_CAST  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast -std=c++11   -Wold-style-cast -o CMakeFiles/cmTC_0c235.dir/src.cxx.o -c /app/v4/build/CMakeFiles/CMakeScratch/TryCompile-mmuUsE/src.cxx
+        Linking CXX executable cmTC_0c235
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0c235.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast CMakeFiles/cmTC_0c235.dir/src.cxx.o -o cmTC_0c235 
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-mmuUsE'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXCompilerFlag.cmake:34 (cmake_check_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/cmake/AddCXXCompilerFlag.cmake:34 (check_cxx_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:180 (add_cxx_compiler_flag)"
+    checks:
+      - "Performing Test HAVE_CXX_FLAG_WERROR"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-n5cJfb"
+      binary: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-n5cJfb"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "HAVE_CXX_FLAG_WERROR"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-n5cJfb'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_be3d4/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_be3d4.dir/build.make CMakeFiles/cmTC_be3d4.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-n5cJfb'
+        Building CXX object CMakeFiles/cmTC_be3d4.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WERROR  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror -std=c++11   -Werror -o CMakeFiles/cmTC_be3d4.dir/src.cxx.o -c /app/v4/build/CMakeFiles/CMakeScratch/TryCompile-n5cJfb/src.cxx
+        Linking CXX executable cmTC_be3d4
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_be3d4.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror CMakeFiles/cmTC_be3d4.dir/src.cxx.o -o cmTC_be3d4 
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-n5cJfb'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXCompilerFlag.cmake:34 (cmake_check_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/cmake/AddCXXCompilerFlag.cmake:34 (check_cxx_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:184 (add_cxx_compiler_flag)"
+    checks:
+      - "Performing Test HAVE_CXX_FLAG_WSUGGEST_OVERRIDE"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-xAEQ3t"
+      binary: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-xAEQ3t"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "HAVE_CXX_FLAG_WSUGGEST_OVERRIDE"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-xAEQ3t'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_b4e58/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_b4e58.dir/build.make CMakeFiles/cmTC_b4e58.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-xAEQ3t'
+        Building CXX object CMakeFiles/cmTC_b4e58.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WSUGGEST_OVERRIDE  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override -std=c++11   -Wsuggest-override -o CMakeFiles/cmTC_b4e58.dir/src.cxx.o -c /app/v4/build/CMakeFiles/CMakeScratch/TryCompile-xAEQ3t/src.cxx
+        Linking CXX executable cmTC_b4e58
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b4e58.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override CMakeFiles/cmTC_b4e58.dir/src.cxx.o -o cmTC_b4e58 
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-xAEQ3t'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXCompilerFlag.cmake:34 (cmake_check_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/cmake/AddCXXCompilerFlag.cmake:34 (check_cxx_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:186 (add_cxx_compiler_flag)"
+    checks:
+      - "Performing Test HAVE_CXX_FLAG_PEDANTIC"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-uCzgfl"
+      binary: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-uCzgfl"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "HAVE_CXX_FLAG_PEDANTIC"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-uCzgfl'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_ce17f/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_ce17f.dir/build.make CMakeFiles/cmTC_ce17f.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-uCzgfl'
+        Building CXX object CMakeFiles/cmTC_ce17f.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_PEDANTIC  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic -std=c++11   -pedantic -o CMakeFiles/cmTC_ce17f.dir/src.cxx.o -c /app/v4/build/CMakeFiles/CMakeScratch/TryCompile-uCzgfl/src.cxx
+        Linking CXX executable cmTC_ce17f
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ce17f.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic CMakeFiles/cmTC_ce17f.dir/src.cxx.o -o cmTC_ce17f 
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-uCzgfl'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXCompilerFlag.cmake:34 (cmake_check_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/cmake/AddCXXCompilerFlag.cmake:34 (check_cxx_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:187 (add_cxx_compiler_flag)"
+    checks:
+      - "Performing Test HAVE_CXX_FLAG_PEDANTIC_ERRORS"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-WRuteZ"
+      binary: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-WRuteZ"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "HAVE_CXX_FLAG_PEDANTIC_ERRORS"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-WRuteZ'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_d0279/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_d0279.dir/build.make CMakeFiles/cmTC_d0279.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-WRuteZ'
+        Building CXX object CMakeFiles/cmTC_d0279.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_PEDANTIC_ERRORS  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors -std=c++11   -pedantic-errors -o CMakeFiles/cmTC_d0279.dir/src.cxx.o -c /app/v4/build/CMakeFiles/CMakeScratch/TryCompile-WRuteZ/src.cxx
+        Linking CXX executable cmTC_d0279
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d0279.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors CMakeFiles/cmTC_d0279.dir/src.cxx.o -o cmTC_d0279 
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-WRuteZ'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXCompilerFlag.cmake:34 (cmake_check_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/cmake/AddCXXCompilerFlag.cmake:34 (check_cxx_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:188 (add_cxx_compiler_flag)"
+    checks:
+      - "Performing Test HAVE_CXX_FLAG_WSHORTEN_64_TO_32"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-JV2KIe"
+      binary: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-JV2KIe"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "HAVE_CXX_FLAG_WSHORTEN_64_TO_32"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-JV2KIe'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_a666f/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_a666f.dir/build.make CMakeFiles/cmTC_a666f.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-JV2KIe'
+        Building CXX object CMakeFiles/cmTC_a666f.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WSHORTEN_64_TO_32  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -Wshorten-64-to-32 -std=c++11   -Wshorten-64-to-32 -o CMakeFiles/cmTC_a666f.dir/src.cxx.o -c /app/v4/build/CMakeFiles/CMakeScratch/TryCompile-JV2KIe/src.cxx
+        c++: error: unrecognized command-line option '-Wshorten-64-to-32'
+        c++: error: unrecognized command-line option '-Wshorten-64-to-32'
+        gmake[1]: *** [CMakeFiles/cmTC_a666f.dir/build.make:78: CMakeFiles/cmTC_a666f.dir/src.cxx.o] Error 1
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-JV2KIe'
+        gmake: *** [Makefile:127: cmTC_a666f/fast] Error 2
+        
+      exitCode: 2
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXCompilerFlag.cmake:34 (cmake_check_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/cmake/AddCXXCompilerFlag.cmake:34 (check_cxx_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:189 (add_cxx_compiler_flag)"
+    checks:
+      - "Performing Test HAVE_CXX_FLAG_FSTRICT_ALIASING"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-U9pDwu"
+      binary: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-U9pDwu"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "HAVE_CXX_FLAG_FSTRICT_ALIASING"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-U9pDwu'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_d3b2d/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_d3b2d.dir/build.make CMakeFiles/cmTC_d3b2d.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-U9pDwu'
+        Building CXX object CMakeFiles/cmTC_d3b2d.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_FSTRICT_ALIASING  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing -std=c++11   -fstrict-aliasing -o CMakeFiles/cmTC_d3b2d.dir/src.cxx.o -c /app/v4/build/CMakeFiles/CMakeScratch/TryCompile-U9pDwu/src.cxx
+        Linking CXX executable cmTC_d3b2d
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d3b2d.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing CMakeFiles/cmTC_d3b2d.dir/src.cxx.o -o cmTC_d3b2d 
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-U9pDwu'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXCompilerFlag.cmake:34 (cmake_check_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/cmake/AddCXXCompilerFlag.cmake:34 (check_cxx_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:192 (add_cxx_compiler_flag)"
+    checks:
+      - "Performing Test HAVE_CXX_FLAG_WNO_DEPRECATED_DECLARATIONS"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-AR2JzE"
+      binary: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-AR2JzE"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "HAVE_CXX_FLAG_WNO_DEPRECATED_DECLARATIONS"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-AR2JzE'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_a907f/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_a907f.dir/build.make CMakeFiles/cmTC_a907f.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-AR2JzE'
+        Building CXX object CMakeFiles/cmTC_a907f.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WNO_DEPRECATED_DECLARATIONS  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations -std=c++11   -Wno-deprecated-declarations -o CMakeFiles/cmTC_a907f.dir/src.cxx.o -c /app/v4/build/CMakeFiles/CMakeScratch/TryCompile-AR2JzE/src.cxx
+        Linking CXX executable cmTC_a907f
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a907f.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations CMakeFiles/cmTC_a907f.dir/src.cxx.o -o cmTC_a907f 
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-AR2JzE'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXCompilerFlag.cmake:34 (cmake_check_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/cmake/AddCXXCompilerFlag.cmake:34 (check_cxx_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:202 (add_cxx_compiler_flag)"
+    checks:
+      - "Performing Test HAVE_CXX_FLAG_WNO_DEPRECATED"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-BkaDKD"
+      binary: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-BkaDKD"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "HAVE_CXX_FLAG_WNO_DEPRECATED"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-BkaDKD'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_1700b/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_1700b.dir/build.make CMakeFiles/cmTC_1700b.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-BkaDKD'
+        Building CXX object CMakeFiles/cmTC_1700b.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WNO_DEPRECATED  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated -std=c++11   -Wno-deprecated -o CMakeFiles/cmTC_1700b.dir/src.cxx.o -c /app/v4/build/CMakeFiles/CMakeScratch/TryCompile-BkaDKD/src.cxx
+        Linking CXX executable cmTC_1700b
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1700b.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated CMakeFiles/cmTC_1700b.dir/src.cxx.o -o cmTC_1700b 
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-BkaDKD'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXCompilerFlag.cmake:34 (cmake_check_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/cmake/AddCXXCompilerFlag.cmake:34 (check_cxx_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:210 (add_cxx_compiler_flag)"
+    checks:
+      - "Performing Test HAVE_CXX_FLAG_WSTRICT_ALIASING"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-KuEYDF"
+      binary: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-KuEYDF"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "HAVE_CXX_FLAG_WSTRICT_ALIASING"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-KuEYDF'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_2480f/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_2480f.dir/build.make CMakeFiles/cmTC_2480f.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-KuEYDF'
+        Building CXX object CMakeFiles/cmTC_2480f.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WSTRICT_ALIASING  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing -std=c++11   -Wstrict-aliasing -o CMakeFiles/cmTC_2480f.dir/src.cxx.o -c /app/v4/build/CMakeFiles/CMakeScratch/TryCompile-KuEYDF/src.cxx
+        Linking CXX executable cmTC_2480f
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2480f.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing CMakeFiles/cmTC_2480f.dir/src.cxx.o -o cmTC_2480f 
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-KuEYDF'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXCompilerFlag.cmake:34 (cmake_check_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/cmake/AddCXXCompilerFlag.cmake:34 (check_cxx_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:215 (add_cxx_compiler_flag)"
+    checks:
+      - "Performing Test HAVE_CXX_FLAG_WD654"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-UFF5uy"
+      binary: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-UFF5uy"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "HAVE_CXX_FLAG_WD654"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-UFF5uy'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_ab008/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_ab008.dir/build.make CMakeFiles/cmTC_ab008.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-UFF5uy'
+        Building CXX object CMakeFiles/cmTC_ab008.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WD654  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -wd654 -std=c++11   -wd654 -o CMakeFiles/cmTC_ab008.dir/src.cxx.o -c /app/v4/build/CMakeFiles/CMakeScratch/TryCompile-UFF5uy/src.cxx
+        c++: error: unrecognized command-line option '-wd654'
+        c++: error: unrecognized command-line option '-wd654'
+        gmake[1]: *** [CMakeFiles/cmTC_ab008.dir/build.make:78: CMakeFiles/cmTC_ab008.dir/src.cxx.o] Error 1
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-UFF5uy'
+        gmake: *** [Makefile:127: cmTC_ab008/fast] Error 2
+        
+      exitCode: 2
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXCompilerFlag.cmake:34 (cmake_check_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/cmake/AddCXXCompilerFlag.cmake:34 (check_cxx_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:216 (add_cxx_compiler_flag)"
+    checks:
+      - "Performing Test HAVE_CXX_FLAG_WTHREAD_SAFETY"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-wgjJVG"
+      binary: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-wgjJVG"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "HAVE_CXX_FLAG_WTHREAD_SAFETY"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-wgjJVG'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_32711/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_32711.dir/build.make CMakeFiles/cmTC_32711.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-wgjJVG'
+        Building CXX object CMakeFiles/cmTC_32711.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WTHREAD_SAFETY  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -Wthread-safety -std=c++11   -Wthread-safety -o CMakeFiles/cmTC_32711.dir/src.cxx.o -c /app/v4/build/CMakeFiles/CMakeScratch/TryCompile-wgjJVG/src.cxx
+        c++: error: unrecognized command-line option '-Wthread-safety'
+        c++: error: unrecognized command-line option '-Wthread-safety'
+        gmake[1]: *** [CMakeFiles/cmTC_32711.dir/build.make:78: CMakeFiles/cmTC_32711.dir/src.cxx.o] Error 1
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-wgjJVG'
+        gmake: *** [Makefile:127: cmTC_32711/fast] Error 2
+        
+      exitCode: 2
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/usr/share/cmake-3.28/Modules/CheckCXXCompilerFlag.cmake:34 (cmake_check_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/cmake/AddCXXCompilerFlag.cmake:34 (check_cxx_compiler_flag)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:267 (add_cxx_compiler_flag)"
+    checks:
+      - "Performing Test HAVE_CXX_FLAG_COVERAGE"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-sli51q"
+      binary: "/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-sli51q"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "HAVE_CXX_FLAG_COVERAGE"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-sli51q'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_4abb2/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_4abb2.dir/build.make CMakeFiles/cmTC_4abb2.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-sli51q'
+        Building CXX object CMakeFiles/cmTC_4abb2.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_COVERAGE  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  --coverage -std=c++11   --coverage -o CMakeFiles/cmTC_4abb2.dir/src.cxx.o -c /app/v4/build/CMakeFiles/CMakeScratch/TryCompile-sli51q/src.cxx
+        Linking CXX executable cmTC_4abb2
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_4abb2.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  --coverage CMakeFiles/cmTC_4abb2.dir/src.cxx.o -o cmTC_4abb2 
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeScratch/TryCompile-sli51q'
+        
+      exitCode: 0
+  -
+    kind: "try_run-v1"
+    backtrace:
+      - "build/_deps/googlebenchmark-src/cmake/CXXFeatureCheck.cmake:57 (try_run)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:297 (cxx_feature_check)"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeTmp"
+      binary: "/app/v4/build/CMakeFiles/CMakeTmp"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "COMPILE_HAVE_STD_REGEX"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeTmp'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_be495/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_be495.dir/build.make CMakeFiles/cmTC_be495.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeTmp'
+        Building CXX object CMakeFiles/cmTC_be495.dir/std_regex.cpp.o
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -std=c++11 -o CMakeFiles/cmTC_be495.dir/std_regex.cpp.o -c /app/v4/build/_deps/googlebenchmark-src/cmake/std_regex.cpp
+        Linking CXX executable cmTC_be495
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_be495.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  CMakeFiles/cmTC_be495.dir/std_regex.cpp.o -o cmTC_be495 
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeTmp'
+        
+      exitCode: 0
+    runResult:
+      variable: "RUN_HAVE_STD_REGEX"
+      cached: true
+      stdout: |
+      exitCode: 0
+  -
+    kind: "try_run-v1"
+    backtrace:
+      - "build/_deps/googlebenchmark-src/cmake/CXXFeatureCheck.cmake:57 (try_run)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:298 (cxx_feature_check)"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeTmp"
+      binary: "/app/v4/build/CMakeFiles/CMakeTmp"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "COMPILE_HAVE_GNU_POSIX_REGEX"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeTmp'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_0720d/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_0720d.dir/build.make CMakeFiles/cmTC_0720d.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeTmp'
+        Building CXX object CMakeFiles/cmTC_0720d.dir/gnu_posix_regex.cpp.o
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -std=c++11 -o CMakeFiles/cmTC_0720d.dir/gnu_posix_regex.cpp.o -c /app/v4/build/_deps/googlebenchmark-src/cmake/gnu_posix_regex.cpp
+        /app/v4/build/_deps/googlebenchmark-src/cmake/gnu_posix_regex.cpp:1:10: fatal error: gnuregex.h: No such file or directory
+            1 | #include <gnuregex.h>
+              |          ^~~~~~~~~~~~
+        compilation terminated.
+        gmake[1]: *** [CMakeFiles/cmTC_0720d.dir/build.make:78: CMakeFiles/cmTC_0720d.dir/gnu_posix_regex.cpp.o] Error 1
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeTmp'
+        gmake: *** [Makefile:127: cmTC_0720d/fast] Error 2
+        
+      exitCode: 2
+    runResult:
+      variable: "RUN_HAVE_GNU_POSIX_REGEX"
+      cached: true
+  -
+    kind: "try_run-v1"
+    backtrace:
+      - "build/_deps/googlebenchmark-src/cmake/CXXFeatureCheck.cmake:57 (try_run)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:299 (cxx_feature_check)"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeTmp"
+      binary: "/app/v4/build/CMakeFiles/CMakeTmp"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "COMPILE_HAVE_POSIX_REGEX"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeTmp'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_82ad4/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_82ad4.dir/build.make CMakeFiles/cmTC_82ad4.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeTmp'
+        Building CXX object CMakeFiles/cmTC_82ad4.dir/posix_regex.cpp.o
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -std=c++11 -o CMakeFiles/cmTC_82ad4.dir/posix_regex.cpp.o -c /app/v4/build/_deps/googlebenchmark-src/cmake/posix_regex.cpp
+        Linking CXX executable cmTC_82ad4
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_82ad4.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  CMakeFiles/cmTC_82ad4.dir/posix_regex.cpp.o -o cmTC_82ad4 
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeTmp'
+        
+      exitCode: 0
+    runResult:
+      variable: "RUN_HAVE_POSIX_REGEX"
+      cached: true
+      stdout: |
+      exitCode: 0
+  -
+    kind: "try_run-v1"
+    backtrace:
+      - "build/_deps/googlebenchmark-src/cmake/CXXFeatureCheck.cmake:57 (try_run)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:308 (cxx_feature_check)"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeTmp"
+      binary: "/app/v4/build/CMakeFiles/CMakeTmp"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "COMPILE_HAVE_STEADY_CLOCK"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeTmp'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_c29c8/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_c29c8.dir/build.make CMakeFiles/cmTC_c29c8.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeTmp'
+        Building CXX object CMakeFiles/cmTC_c29c8.dir/steady_clock.cpp.o
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -std=c++11 -o CMakeFiles/cmTC_c29c8.dir/steady_clock.cpp.o -c /app/v4/build/_deps/googlebenchmark-src/cmake/steady_clock.cpp
+        Linking CXX executable cmTC_c29c8
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c29c8.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  CMakeFiles/cmTC_c29c8.dir/steady_clock.cpp.o -o cmTC_c29c8 
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeTmp'
+        
+      exitCode: 0
+    runResult:
+      variable: "RUN_HAVE_STEADY_CLOCK"
+      cached: true
+      stdout: |
+      exitCode: 0
+  -
+    kind: "try_run-v1"
+    backtrace:
+      - "build/_deps/googlebenchmark-src/cmake/CXXFeatureCheck.cmake:57 (try_run)"
+      - "build/_deps/googlebenchmark-src/CMakeLists.txt:312 (cxx_feature_check)"
+    directories:
+      source: "/app/v4/build/CMakeFiles/CMakeTmp"
+      binary: "/app/v4/build/CMakeFiles/CMakeTmp"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing"
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "/app/v4/build/_deps/googlebenchmark-src/cmake/Modules;/app/v4/build/_deps/googlebenchmark-src/cmake"
+    buildResult:
+      variable: "COMPILE_HAVE_PTHREAD_AFFINITY"
+      cached: true
+      stdout: |
+        Change Dir: '/app/v4/build/CMakeFiles/CMakeTmp'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_4d539/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_4d539.dir/build.make CMakeFiles/cmTC_4d539.dir/build
+        gmake[1]: Entering directory '/app/v4/build/CMakeFiles/CMakeTmp'
+        Building CXX object CMakeFiles/cmTC_4d539.dir/pthread_affinity.cpp.o
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -std=c++11 -o CMakeFiles/cmTC_4d539.dir/pthread_affinity.cpp.o -c /app/v4/build/_deps/googlebenchmark-src/cmake/pthread_affinity.cpp
+        Linking CXX executable cmTC_4d539
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_4d539.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  CMakeFiles/cmTC_4d539.dir/pthread_affinity.cpp.o -o cmTC_4d539 
+        gmake[1]: Leaving directory '/app/v4/build/CMakeFiles/CMakeTmp'
+        
+      exitCode: 0
+    runResult:
+      variable: "RUN_HAVE_PTHREAD_AFFINITY"
+      cached: true
+      stdout: |
+      exitCode: 0
+...

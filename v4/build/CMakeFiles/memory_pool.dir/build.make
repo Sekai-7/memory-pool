@@ -83,81 +83,18 @@ CMakeFiles/memory_pool.dir/src/main.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/memory_pool.dir/src/main.cc.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/v4/src/main.cc -o CMakeFiles/memory_pool.dir/src/main.cc.s
 
-CMakeFiles/memory_pool.dir/src/MetaData.cc.o: CMakeFiles/memory_pool.dir/flags.make
-CMakeFiles/memory_pool.dir/src/MetaData.cc.o: /app/v4/src/MetaData.cc
-CMakeFiles/memory_pool.dir/src/MetaData.cc.o: CMakeFiles/memory_pool.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/v4/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/memory_pool.dir/src/MetaData.cc.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/memory_pool.dir/src/MetaData.cc.o -MF CMakeFiles/memory_pool.dir/src/MetaData.cc.o.d -o CMakeFiles/memory_pool.dir/src/MetaData.cc.o -c /app/v4/src/MetaData.cc
-
-CMakeFiles/memory_pool.dir/src/MetaData.cc.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/memory_pool.dir/src/MetaData.cc.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/v4/src/MetaData.cc > CMakeFiles/memory_pool.dir/src/MetaData.cc.i
-
-CMakeFiles/memory_pool.dir/src/MetaData.cc.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/memory_pool.dir/src/MetaData.cc.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/v4/src/MetaData.cc -o CMakeFiles/memory_pool.dir/src/MetaData.cc.s
-
-CMakeFiles/memory_pool.dir/src/CentralCache.cc.o: CMakeFiles/memory_pool.dir/flags.make
-CMakeFiles/memory_pool.dir/src/CentralCache.cc.o: /app/v4/src/CentralCache.cc
-CMakeFiles/memory_pool.dir/src/CentralCache.cc.o: CMakeFiles/memory_pool.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/v4/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/memory_pool.dir/src/CentralCache.cc.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/memory_pool.dir/src/CentralCache.cc.o -MF CMakeFiles/memory_pool.dir/src/CentralCache.cc.o.d -o CMakeFiles/memory_pool.dir/src/CentralCache.cc.o -c /app/v4/src/CentralCache.cc
-
-CMakeFiles/memory_pool.dir/src/CentralCache.cc.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/memory_pool.dir/src/CentralCache.cc.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/v4/src/CentralCache.cc > CMakeFiles/memory_pool.dir/src/CentralCache.cc.i
-
-CMakeFiles/memory_pool.dir/src/CentralCache.cc.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/memory_pool.dir/src/CentralCache.cc.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/v4/src/CentralCache.cc -o CMakeFiles/memory_pool.dir/src/CentralCache.cc.s
-
-CMakeFiles/memory_pool.dir/src/PageCache.cc.o: CMakeFiles/memory_pool.dir/flags.make
-CMakeFiles/memory_pool.dir/src/PageCache.cc.o: /app/v4/src/PageCache.cc
-CMakeFiles/memory_pool.dir/src/PageCache.cc.o: CMakeFiles/memory_pool.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/v4/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/memory_pool.dir/src/PageCache.cc.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/memory_pool.dir/src/PageCache.cc.o -MF CMakeFiles/memory_pool.dir/src/PageCache.cc.o.d -o CMakeFiles/memory_pool.dir/src/PageCache.cc.o -c /app/v4/src/PageCache.cc
-
-CMakeFiles/memory_pool.dir/src/PageCache.cc.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/memory_pool.dir/src/PageCache.cc.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/v4/src/PageCache.cc > CMakeFiles/memory_pool.dir/src/PageCache.cc.i
-
-CMakeFiles/memory_pool.dir/src/PageCache.cc.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/memory_pool.dir/src/PageCache.cc.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/v4/src/PageCache.cc -o CMakeFiles/memory_pool.dir/src/PageCache.cc.s
-
-CMakeFiles/memory_pool.dir/src/ThreadCache.cc.o: CMakeFiles/memory_pool.dir/flags.make
-CMakeFiles/memory_pool.dir/src/ThreadCache.cc.o: /app/v4/src/ThreadCache.cc
-CMakeFiles/memory_pool.dir/src/ThreadCache.cc.o: CMakeFiles/memory_pool.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/app/v4/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/memory_pool.dir/src/ThreadCache.cc.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/memory_pool.dir/src/ThreadCache.cc.o -MF CMakeFiles/memory_pool.dir/src/ThreadCache.cc.o.d -o CMakeFiles/memory_pool.dir/src/ThreadCache.cc.o -c /app/v4/src/ThreadCache.cc
-
-CMakeFiles/memory_pool.dir/src/ThreadCache.cc.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/memory_pool.dir/src/ThreadCache.cc.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /app/v4/src/ThreadCache.cc > CMakeFiles/memory_pool.dir/src/ThreadCache.cc.i
-
-CMakeFiles/memory_pool.dir/src/ThreadCache.cc.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/memory_pool.dir/src/ThreadCache.cc.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /app/v4/src/ThreadCache.cc -o CMakeFiles/memory_pool.dir/src/ThreadCache.cc.s
-
 # Object files for target memory_pool
 memory_pool_OBJECTS = \
-"CMakeFiles/memory_pool.dir/src/main.cc.o" \
-"CMakeFiles/memory_pool.dir/src/MetaData.cc.o" \
-"CMakeFiles/memory_pool.dir/src/CentralCache.cc.o" \
-"CMakeFiles/memory_pool.dir/src/PageCache.cc.o" \
-"CMakeFiles/memory_pool.dir/src/ThreadCache.cc.o"
+"CMakeFiles/memory_pool.dir/src/main.cc.o"
 
 # External object files for target memory_pool
 memory_pool_EXTERNAL_OBJECTS =
 
 memory_pool: CMakeFiles/memory_pool.dir/src/main.cc.o
-memory_pool: CMakeFiles/memory_pool.dir/src/MetaData.cc.o
-memory_pool: CMakeFiles/memory_pool.dir/src/CentralCache.cc.o
-memory_pool: CMakeFiles/memory_pool.dir/src/PageCache.cc.o
-memory_pool: CMakeFiles/memory_pool.dir/src/ThreadCache.cc.o
 memory_pool: CMakeFiles/memory_pool.dir/build.make
+memory_pool: libmemory_pool_core.a
 memory_pool: CMakeFiles/memory_pool.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/v4/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable memory_pool"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/app/v4/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable memory_pool"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/memory_pool.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

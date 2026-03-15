@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/memory_pool_test.dir/memory_pool_test.cc.o -o memory_pool_test  ../libmemory_pool_core.a ../lib/libgtest_main.a ../lib/libgtest.a 

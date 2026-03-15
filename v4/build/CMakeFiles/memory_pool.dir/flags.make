@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/app/v4/inc
 
-CXX_FLAGS = -O3 -DNDEBUG -std=gnu++23 -Wall -Wextra -Werror
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++23
 

@@ -1,0 +1,5 @@
+if(EXISTS "/app/v4/build/test/memory_pool_test[1]_tests.cmake")
+  include("/app/v4/build/test/memory_pool_test[1]_tests.cmake")
+else()
+  add_test(memory_pool_test_NOT_BUILT memory_pool_test_NOT_BUILT)
+endif()

@@ -65,6 +65,16 @@ CMAKE_BINARY_DIR = /app/v4/build
 #=============================================================================
 # Targets provided globally by CMake.
 
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running tests..."
+	/usr/bin/ctest --force-new-ctest-process $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+.PHONY : test/fast
+
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "No interactive CMake dialog available..."
@@ -84,6 +94,51 @@ rebuild_cache:
 # Special rule for the target rebuild_cache
 rebuild_cache/fast: rebuild_cache
 .PHONY : rebuild_cache/fast
+
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\" \"gmock\" \"gtest\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+.PHONY : list_install_components/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/usr/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/usr/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
+
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -117,6 +172,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named memory_pool_core
+
+# Build rule for target.
+memory_pool_core: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 memory_pool_core
+.PHONY : memory_pool_core
+
+# fast build rule for target.
+memory_pool_core/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool_core.dir/build.make CMakeFiles/memory_pool_core.dir/build
+.PHONY : memory_pool_core/fast
+
+#=============================================================================
 # Target rules for targets named memory_pool
 
 # Build rule for target.
@@ -129,12 +197,116 @@ memory_pool/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool.dir/build.make CMakeFiles/memory_pool.dir/build
 .PHONY : memory_pool/fast
 
+#=============================================================================
+# Target rules for targets named memory_pool_test
+
+# Build rule for target.
+memory_pool_test: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 memory_pool_test
+.PHONY : memory_pool_test
+
+# fast build rule for target.
+memory_pool_test/fast:
+	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/memory_pool_test.dir/build.make test/CMakeFiles/memory_pool_test.dir/build
+.PHONY : memory_pool_test/fast
+
+#=============================================================================
+# Target rules for targets named gmock
+
+# Build rule for target.
+gmock: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gmock
+.PHONY : gmock
+
+# fast build rule for target.
+gmock/fast:
+	$(MAKE) $(MAKESILENT) -f _deps/googletest-build/googlemock/CMakeFiles/gmock.dir/build.make _deps/googletest-build/googlemock/CMakeFiles/gmock.dir/build
+.PHONY : gmock/fast
+
+#=============================================================================
+# Target rules for targets named gmock_main
+
+# Build rule for target.
+gmock_main: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gmock_main
+.PHONY : gmock_main
+
+# fast build rule for target.
+gmock_main/fast:
+	$(MAKE) $(MAKESILENT) -f _deps/googletest-build/googlemock/CMakeFiles/gmock_main.dir/build.make _deps/googletest-build/googlemock/CMakeFiles/gmock_main.dir/build
+.PHONY : gmock_main/fast
+
+#=============================================================================
+# Target rules for targets named gtest
+
+# Build rule for target.
+gtest: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gtest
+.PHONY : gtest
+
+# fast build rule for target.
+gtest/fast:
+	$(MAKE) $(MAKESILENT) -f _deps/googletest-build/googletest/CMakeFiles/gtest.dir/build.make _deps/googletest-build/googletest/CMakeFiles/gtest.dir/build
+.PHONY : gtest/fast
+
+#=============================================================================
+# Target rules for targets named gtest_main
+
+# Build rule for target.
+gtest_main: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gtest_main
+.PHONY : gtest_main
+
+# fast build rule for target.
+gtest_main/fast:
+	$(MAKE) $(MAKESILENT) -f _deps/googletest-build/googletest/CMakeFiles/gtest_main.dir/build.make _deps/googletest-build/googletest/CMakeFiles/gtest_main.dir/build
+.PHONY : gtest_main/fast
+
+#=============================================================================
+# Target rules for targets named memory_pool_benchmark
+
+# Build rule for target.
+memory_pool_benchmark: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 memory_pool_benchmark
+.PHONY : memory_pool_benchmark
+
+# fast build rule for target.
+memory_pool_benchmark/fast:
+	$(MAKE) $(MAKESILENT) -f benchmark/CMakeFiles/memory_pool_benchmark.dir/build.make benchmark/CMakeFiles/memory_pool_benchmark.dir/build
+.PHONY : memory_pool_benchmark/fast
+
+#=============================================================================
+# Target rules for targets named benchmark
+
+# Build rule for target.
+benchmark: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 benchmark
+.PHONY : benchmark
+
+# fast build rule for target.
+benchmark/fast:
+	$(MAKE) $(MAKESILENT) -f _deps/googlebenchmark-build/src/CMakeFiles/benchmark.dir/build.make _deps/googlebenchmark-build/src/CMakeFiles/benchmark.dir/build
+.PHONY : benchmark/fast
+
+#=============================================================================
+# Target rules for targets named benchmark_main
+
+# Build rule for target.
+benchmark_main: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 benchmark_main
+.PHONY : benchmark_main
+
+# fast build rule for target.
+benchmark_main/fast:
+	$(MAKE) $(MAKESILENT) -f _deps/googlebenchmark-build/src/CMakeFiles/benchmark_main.dir/build.make _deps/googlebenchmark-build/src/CMakeFiles/benchmark_main.dir/build
+.PHONY : benchmark_main/fast
+
 src/CentralCache.o: src/CentralCache.cc.o
 .PHONY : src/CentralCache.o
 
 # target to build an object file
 src/CentralCache.cc.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool.dir/build.make CMakeFiles/memory_pool.dir/src/CentralCache.cc.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool_core.dir/build.make CMakeFiles/memory_pool_core.dir/src/CentralCache.cc.o
 .PHONY : src/CentralCache.cc.o
 
 src/CentralCache.i: src/CentralCache.cc.i
@@ -142,7 +314,7 @@ src/CentralCache.i: src/CentralCache.cc.i
 
 # target to preprocess a source file
 src/CentralCache.cc.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool.dir/build.make CMakeFiles/memory_pool.dir/src/CentralCache.cc.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool_core.dir/build.make CMakeFiles/memory_pool_core.dir/src/CentralCache.cc.i
 .PHONY : src/CentralCache.cc.i
 
 src/CentralCache.s: src/CentralCache.cc.s
@@ -150,7 +322,7 @@ src/CentralCache.s: src/CentralCache.cc.s
 
 # target to generate assembly for a file
 src/CentralCache.cc.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool.dir/build.make CMakeFiles/memory_pool.dir/src/CentralCache.cc.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool_core.dir/build.make CMakeFiles/memory_pool_core.dir/src/CentralCache.cc.s
 .PHONY : src/CentralCache.cc.s
 
 src/MetaData.o: src/MetaData.cc.o
@@ -158,7 +330,7 @@ src/MetaData.o: src/MetaData.cc.o
 
 # target to build an object file
 src/MetaData.cc.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool.dir/build.make CMakeFiles/memory_pool.dir/src/MetaData.cc.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool_core.dir/build.make CMakeFiles/memory_pool_core.dir/src/MetaData.cc.o
 .PHONY : src/MetaData.cc.o
 
 src/MetaData.i: src/MetaData.cc.i
@@ -166,7 +338,7 @@ src/MetaData.i: src/MetaData.cc.i
 
 # target to preprocess a source file
 src/MetaData.cc.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool.dir/build.make CMakeFiles/memory_pool.dir/src/MetaData.cc.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool_core.dir/build.make CMakeFiles/memory_pool_core.dir/src/MetaData.cc.i
 .PHONY : src/MetaData.cc.i
 
 src/MetaData.s: src/MetaData.cc.s
@@ -174,7 +346,7 @@ src/MetaData.s: src/MetaData.cc.s
 
 # target to generate assembly for a file
 src/MetaData.cc.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool.dir/build.make CMakeFiles/memory_pool.dir/src/MetaData.cc.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool_core.dir/build.make CMakeFiles/memory_pool_core.dir/src/MetaData.cc.s
 .PHONY : src/MetaData.cc.s
 
 src/PageCache.o: src/PageCache.cc.o
@@ -182,7 +354,7 @@ src/PageCache.o: src/PageCache.cc.o
 
 # target to build an object file
 src/PageCache.cc.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool.dir/build.make CMakeFiles/memory_pool.dir/src/PageCache.cc.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool_core.dir/build.make CMakeFiles/memory_pool_core.dir/src/PageCache.cc.o
 .PHONY : src/PageCache.cc.o
 
 src/PageCache.i: src/PageCache.cc.i
@@ -190,7 +362,7 @@ src/PageCache.i: src/PageCache.cc.i
 
 # target to preprocess a source file
 src/PageCache.cc.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool.dir/build.make CMakeFiles/memory_pool.dir/src/PageCache.cc.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool_core.dir/build.make CMakeFiles/memory_pool_core.dir/src/PageCache.cc.i
 .PHONY : src/PageCache.cc.i
 
 src/PageCache.s: src/PageCache.cc.s
@@ -198,7 +370,7 @@ src/PageCache.s: src/PageCache.cc.s
 
 # target to generate assembly for a file
 src/PageCache.cc.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool.dir/build.make CMakeFiles/memory_pool.dir/src/PageCache.cc.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool_core.dir/build.make CMakeFiles/memory_pool_core.dir/src/PageCache.cc.s
 .PHONY : src/PageCache.cc.s
 
 src/ThreadCache.o: src/ThreadCache.cc.o
@@ -206,7 +378,7 @@ src/ThreadCache.o: src/ThreadCache.cc.o
 
 # target to build an object file
 src/ThreadCache.cc.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool.dir/build.make CMakeFiles/memory_pool.dir/src/ThreadCache.cc.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool_core.dir/build.make CMakeFiles/memory_pool_core.dir/src/ThreadCache.cc.o
 .PHONY : src/ThreadCache.cc.o
 
 src/ThreadCache.i: src/ThreadCache.cc.i
@@ -214,7 +386,7 @@ src/ThreadCache.i: src/ThreadCache.cc.i
 
 # target to preprocess a source file
 src/ThreadCache.cc.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool.dir/build.make CMakeFiles/memory_pool.dir/src/ThreadCache.cc.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool_core.dir/build.make CMakeFiles/memory_pool_core.dir/src/ThreadCache.cc.i
 .PHONY : src/ThreadCache.cc.i
 
 src/ThreadCache.s: src/ThreadCache.cc.s
@@ -222,7 +394,7 @@ src/ThreadCache.s: src/ThreadCache.cc.s
 
 # target to generate assembly for a file
 src/ThreadCache.cc.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool.dir/build.make CMakeFiles/memory_pool.dir/src/ThreadCache.cc.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/memory_pool_core.dir/build.make CMakeFiles/memory_pool_core.dir/src/ThreadCache.cc.s
 .PHONY : src/ThreadCache.cc.s
 
 src/main.o: src/main.cc.o
@@ -256,8 +428,22 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... install"
+	@echo "... install/local"
+	@echo "... install/strip"
+	@echo "... list_install_components"
 	@echo "... rebuild_cache"
+	@echo "... test"
+	@echo "... benchmark"
+	@echo "... benchmark_main"
+	@echo "... gmock"
+	@echo "... gmock_main"
+	@echo "... gtest"
+	@echo "... gtest_main"
 	@echo "... memory_pool"
+	@echo "... memory_pool_benchmark"
+	@echo "... memory_pool_core"
+	@echo "... memory_pool_test"
 	@echo "... src/CentralCache.o"
 	@echo "... src/CentralCache.i"
 	@echo "... src/CentralCache.s"
