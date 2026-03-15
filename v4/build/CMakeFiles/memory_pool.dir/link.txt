@@ -1,1 +1,0 @@
-/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/memory_pool.dir/src/main.cc.o -o memory_pool  libmemory_pool_core.a 

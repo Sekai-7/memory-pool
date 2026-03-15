@@ -1,1 +1,0 @@
-/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/memory_pool_benchmark.dir/memory_pool_benchmark.cc.o -o memory_pool_benchmark  ../libmemory_pool_core.a ../_deps/googlebenchmark-build/src/libbenchmark.a ../_deps/googlebenchmark-build/src/libbenchmark_main.a -lpthread ../_deps/googlebenchmark-build/src/libbenchmark.a -lrt 
