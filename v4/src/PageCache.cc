@@ -33,6 +33,7 @@ Span* PageCache::allocate(size_t pageCount) {
                     RadixTreePageMap::getInstance().setSpan(pageAddr, splice);
                 }
             }
+            ret->isFree = false;
             return ret;
         }
     }
@@ -58,6 +59,48 @@ void PageCache::deallocate(Span* span) {
 
     {
         std::lock_guard<std::mutex> lock(page_mutex_);
+        span->isFree = true;
+        span->objSize = 0;
+        span->useCount = 0;
+        span->freeList = nullptr;
+        span->prev = nullptr;
+        span->next = nullptr;
+
+        while (true) {
+            auto preAddr = reinterpret_cast<uintptr_t>(span->ptr) - PAGE_SIZE;
+            auto pre = RadixTreePageMap::getInstance().getSpan(preAddr);
+            if (pre == nullptr || pre->isFree == false || pre->pageCount + span->pageCount > MAX_PAGES) {
+                break;
+            }
+            spanLists_[pre->pageCount - 1].remove(pre);
+            pre->pageCount += span->pageCount;
+
+            for (size_t i = 0; i < span->pageCount; ++i) {
+                RadixTreePageMap::getInstance().setSpan(reinterpret_cast<uintptr_t>(span->ptr) + i * PAGE_SIZE, pre);
+            }
+
+            SpanAllocator::getInstance().deallocate(span);
+            span = pre;
+        }
+
+        while (true) {
+            auto nextAddr = reinterpret_cast<uintptr_t>(span->ptr) + span->pageCount * PAGE_SIZE;
+            auto next = RadixTreePageMap::getInstance().getSpan(nextAddr);
+            if (next == nullptr || next->isFree == false || next->pageCount + span->pageCount > MAX_PAGES) {
+                break;
+            }
+            spanLists_[next->pageCount - 1].remove(next);
+            next->ptr = span->ptr;
+            next->pageCount += span->pageCount;
+
+            for (size_t i = 0; i < span->pageCount; ++i) {
+                RadixTreePageMap::getInstance().setSpan(reinterpret_cast<uintptr_t>(span->ptr) + i * PAGE_SIZE, next);
+            }
+
+            SpanAllocator::getInstance().deallocate(span);
+            span = next;
+        }
+
         spanLists_[span->pageCount - 1].pushFront(span);
     }
     return;

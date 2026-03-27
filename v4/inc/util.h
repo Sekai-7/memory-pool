@@ -135,6 +135,7 @@ public:
     void* ptr{nullptr};         // Span 管理的起始物理页地址
     size_t pageCount{0};        // Span 包含的连续物理页数量
     size_t objSize{0};          // 切分的目标对象大小 (Size Class)
+    bool isFree = true;         // Span当前是否被CentralCache使用
     
     size_t useCount{0};         // 核心状态：已分配给 ThreadCache 的对象数量
     std::byte* freeList{nullptr}; // 核心状态：内部尚未分配（或已归还）的空闲对象单向链表

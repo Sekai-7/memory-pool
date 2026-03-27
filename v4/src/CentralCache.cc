@@ -96,8 +96,14 @@ void CentralCache::deallocate(std::byte* listHead, size_t idx, size_t count) {
 
         if (span->useCount == 0) {
             nonempty_[index].remove(span);
+            locks_[index].clear(std::memory_order_release);
+
             // 先不做处理
-            // PageCache::getInstance().deallocate(span);
+            PageCache::getInstance().deallocate(span);
+
+            while (locks_[index].test_and_set(std::memory_order_acquire)) {
+                std::this_thread::yield();
+            }
         }
 
         current = next;
