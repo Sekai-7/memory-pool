@@ -16,7 +16,7 @@ public:
     }
 
     void* allocate(size_t size);
-    void deallocate(void* ptr, size_t size);
+    void deallocate(void* ptr);
 
 public:
     ThreadCache(const ThreadCache&) = delete;

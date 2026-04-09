@@ -1,78 +1,130 @@
 #include <gtest/gtest.h>
+
 #include "Allocator.h"
-#include <vector>
+#include "util.h"
+
+#include <array>
+#include <atomic>
+#include <cstddef>
+#include <cstring>
 #include <thread>
+#include <vector>
 
 using namespace memorypool;
 
-// 测试基本分配与释放
-TEST(MemoryPoolTest, BasicAllocation) {
-    void* ptr = allocate(16);
-    EXPECT_NE(ptr, nullptr);
-    deallocate(ptr, 16);
+namespace {
+
+constexpr std::array<size_t, 8> kSupportedSizes{8, 16, 32, 64, 128, 256, 512, 1024};
+
+}  // namespace
+
+TEST(MemoryPoolTest, AllocatesSupportedSizeClasses) {
+    for (size_t size : kSupportedSizes) {
+        void* ptr = allocate(size);
+        ASSERT_NE(ptr, nullptr) << "size=" << size;
+        deallocate(ptr);
+    }
 }
 
-// 测试多次分配与释放
-TEST(MemoryPoolTest, MultipleAllocations) {
-    std::vector<void*> ptrs;
-    const size_t allocSize = 32;
-    const int count = 1000;
+TEST(MemoryPoolTest, ReturnsAlignedPointers) {
+    for (size_t size : kSupportedSizes) {
+        void* ptr = allocate(size);
+        ASSERT_NE(ptr, nullptr) << "size=" << size;
+        EXPECT_EQ(reinterpret_cast<std::uintptr_t>(ptr) % ALIGNLEN, 0U) << "size=" << size;
+        deallocate(ptr);
+    }
+}
 
-    for (int i = 0; i < count; ++i) {
-        void* ptr = allocate(allocSize);
-        EXPECT_NE(ptr, nullptr);
+TEST(MemoryPoolTest, PreservesWrittenData) {
+    constexpr size_t kSize = 128;
+
+    auto* ptr = static_cast<unsigned char*>(allocate(kSize));
+    ASSERT_NE(ptr, nullptr);
+
+    for (size_t i = 0; i < kSize; ++i) {
+        ptr[i] = static_cast<unsigned char>(i);
+    }
+
+    for (size_t i = 0; i < kSize; ++i) {
+        EXPECT_EQ(ptr[i], static_cast<unsigned char>(i));
+    }
+
+    deallocate(ptr);
+}
+
+TEST(MemoryPoolTest, ReusesFreedBlocksWithinThread) {
+    constexpr size_t kSize = 64;
+
+    void* first = allocate(kSize);
+    ASSERT_NE(first, nullptr);
+    deallocate(first);
+
+    void* second = allocate(kSize);
+    ASSERT_NE(second, nullptr);
+    EXPECT_EQ(first, second);
+    deallocate(second);
+}
+
+TEST(MemoryPoolTest, SupportsRepeatedAllocationsAndReleases) {
+    constexpr size_t kSize = 32;
+    constexpr int kCount = 1000;
+
+    std::vector<void*> ptrs;
+    ptrs.reserve(kCount);
+
+    for (int i = 0; i < kCount; ++i) {
+        void* ptr = allocate(kSize);
+        ASSERT_NE(ptr, nullptr);
         ptrs.push_back(ptr);
     }
 
     for (void* ptr : ptrs) {
-        deallocate(ptr, allocSize);
+        deallocate(ptr);
     }
 }
 
-// 测试不同大小的分配
-TEST(MemoryPoolTest, DifferentSizesAllocation) {
-    std::vector<size_t> sizes = {8, 16, 32, 64, 128, 256, 512, 1024};
-    std::vector<void*> ptrs;
+TEST(MemoryPoolTest, HandlesConcurrentMixedSizeWorkload) {
+    constexpr int kThreadCount = 4;
+    constexpr int kOperationsPerThread = 2000;
 
-    for (size_t size : sizes) {
-        void* ptr = allocate(size);
-        EXPECT_NE(ptr, nullptr);
-        ptrs.push_back(ptr);
-    }
+    std::atomic<bool> failed{false};
 
-    for (size_t i = 0; i < sizes.size(); ++i) {
-        deallocate(ptrs[i], sizes[i]);
-    }
-}
+    auto worker = [&failed](int seed) {
+        std::vector<std::pair<void*, size_t>> live;
+        live.reserve(kOperationsPerThread);
 
-// 测试多线程环境下的分配与释放
-TEST(MemoryPoolTest, ThreadSafeAllocation) {
-    auto worker = []() {
-        std::vector<void*> ptrs;
-        const size_t allocSize = 64;
-        const int count = 1000;
+        for (int i = 0; i < kOperationsPerThread && !failed.load(); ++i) {
+            size_t size = kSupportedSizes[(static_cast<size_t>(seed) + static_cast<size_t>(i)) % kSupportedSizes.size()];
+            auto* ptr = static_cast<unsigned char*>(allocate(size));
+            if (ptr == nullptr) {
+                failed.store(true);
+                break;
+            }
 
-        for (int i = 0; i < count; ++i) {
-            void* ptr = allocate(allocSize);
-            EXPECT_NE(ptr, nullptr);
-            ptrs.push_back(ptr);
+            std::memset(ptr, seed + i, size);
+            live.emplace_back(ptr, size);
+
+            if ((i % 3) == 0) {
+                deallocate(live.back().first);
+                live.pop_back();
+            }
         }
 
-        for (void* ptr : ptrs) {
-            deallocate(ptr, allocSize);
+        for (auto it = live.rbegin(); it != live.rend(); ++it) {
+            deallocate(it->first);
         }
     };
 
-    const int threadCount = 4;
     std::vector<std::thread> threads;
+    threads.reserve(kThreadCount);
 
-    for (int i = 0; i < threadCount; ++i) {
-        threads.emplace_back(worker);
+    for (int i = 0; i < kThreadCount; ++i) {
+        threads.emplace_back(worker, i + 1);
     }
 
-    for (auto& t : threads) {
-        if (t.joinable()) {
-            t.join();
-        }
+    for (auto& thread : threads) {
+        thread.join();
     }
+
+    EXPECT_FALSE(failed.load());
 }

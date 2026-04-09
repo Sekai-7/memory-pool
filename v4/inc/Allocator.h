@@ -10,8 +10,8 @@ namespace memorypool {
         return ThreadCache::getInstance().allocate(size);
     }
 
-    inline void deallocate(void* ptr, size_t size) {
-        ThreadCache::getInstance().deallocate(ptr, size);
+    inline void deallocate(void* ptr) {
+        ThreadCache::getInstance().deallocate(ptr);
         return;
     }
 }

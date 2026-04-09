@@ -1,124 +1,137 @@
 #include <benchmark/benchmark.h>
+
 #include "Allocator.h"
+
+#include <array>
+#include <cstddef>
 #include <cstdlib>
+#include <cstring>
 #include <vector>
 
 using namespace memorypool;
 
-// --- Single Thread Malloc ---
-static void BM_Malloc_SingleThread(benchmark::State& state) {
-    const size_t size = state.range(0);
+namespace {
+
+constexpr std::array<int, 8> kBenchmarkSizes{8, 16, 32, 64, 128, 256, 512, 1024};
+constexpr int kBatchSize = 512;
+
+template <typename AllocateFn, typename DeallocateFn>
+void RunSingleObjectLoop(benchmark::State& state, AllocateFn allocate_fn, DeallocateFn deallocate_fn) {
+    const size_t size = static_cast<size_t>(state.range(0));
     for (auto _ : state) {
-        void* ptr = std::malloc(size);
+        void* ptr = allocate_fn(size);
         benchmark::DoNotOptimize(ptr);
-        std::free(ptr);
+        deallocate_fn(ptr);
     }
+    state.SetItemsProcessed(state.iterations());
+    state.SetBytesProcessed(state.iterations() * static_cast<int64_t>(size));
 }
-BENCHMARK(BM_Malloc_SingleThread)->RangeMultiplier(2)->Range(8, 1024);
 
-// --- Single Thread MemoryPool ---
-static void BM_MemoryPool_SingleThread(benchmark::State& state) {
-    const size_t size = state.range(0);
-    for (auto _ : state) {
-        void* ptr = allocate(size);
-        benchmark::DoNotOptimize(ptr);
-        deallocate(ptr, size);
-    }
-}
-BENCHMARK(BM_MemoryPool_SingleThread)->RangeMultiplier(2)->Range(8, 1024);
-
-// --- Multi Thread Malloc ---
-static void BM_Malloc_MultiThread(benchmark::State& state) {
-    const size_t size = state.range(0);
-    for (auto _ : state) {
-        void* ptr = std::malloc(size);
-        benchmark::DoNotOptimize(ptr);
-        std::free(ptr);
-    }
-}
-BENCHMARK(BM_Malloc_MultiThread)->RangeMultiplier(2)->Range(8, 1024)->Threads(2)->Threads(4)->Threads(8);
-
-// --- Multi Thread MemoryPool ---
-static void BM_MemoryPool_MultiThread(benchmark::State& state) {
-    const size_t size = state.range(0);
-    for (auto _ : state) {
-        void* ptr = allocate(size);
-        benchmark::DoNotOptimize(ptr);
-        deallocate(ptr, size);
-    }
-}
-BENCHMARK(BM_MemoryPool_MultiThread)->RangeMultiplier(2)->Range(8, 1024)->Threads(2)->Threads(4)->Threads(8);
-
-// --- Batch Malloc ---
-static void BM_Malloc_Batch(benchmark::State& state) {
-    const size_t size = state.range(0);
-    const int batch_size = 1000;
+template <typename AllocateFn, typename DeallocateFn>
+void RunBatchLoop(benchmark::State& state, AllocateFn allocate_fn, DeallocateFn deallocate_fn) {
+    const size_t size = static_cast<size_t>(state.range(0));
     std::vector<void*> ptrs;
-    ptrs.reserve(batch_size);
-    for (auto _ : state) {
-        for (int i = 0; i < batch_size; ++i) {
-            ptrs.push_back(std::malloc(size));
-        }
-        for (void* ptr : ptrs) {
-            std::free(ptr);
-        }
-        ptrs.clear();
-    }
-}
-BENCHMARK(BM_Malloc_Batch)->RangeMultiplier(2)->Range(8, 1024);
+    ptrs.reserve(kBatchSize);
 
-// --- Batch MemoryPool ---
-static void BM_MemoryPool_Batch(benchmark::State& state) {
-    const size_t size = state.range(0);
-    const int batch_size = 1000;
-    std::vector<void*> ptrs;
-    ptrs.reserve(batch_size);
     for (auto _ : state) {
-        for (int i = 0; i < batch_size; ++i) {
-            ptrs.push_back(allocate(size));
-        }
-        for (void* ptr : ptrs) {
-            deallocate(ptr, size);
-        }
         ptrs.clear();
+        for (int i = 0; i < kBatchSize; ++i) {
+            ptrs.push_back(allocate_fn(size));
+        }
+        benchmark::ClobberMemory();
+        for (void* ptr : ptrs) {
+            deallocate_fn(ptr);
+        }
     }
-}
-BENCHMARK(BM_MemoryPool_Batch)->RangeMultiplier(2)->Range(8, 1024);
 
-// --- Batch Multi Thread Malloc ---
-static void BM_Malloc_Batch_MultiThread(benchmark::State& state) {
-    const size_t size = state.range(0);
-    const int batch_size = 1000;
-    std::vector<void*> ptrs;
-    ptrs.reserve(batch_size);
-    for (auto _ : state) {
-        for (int i = 0; i < batch_size; ++i) {
-            ptrs.push_back(std::malloc(size));
-        }
-        for (void* ptr : ptrs) {
-            std::free(ptr);
-        }
-        ptrs.clear();
-    }
+    state.SetItemsProcessed(state.iterations() * kBatchSize);
+    state.SetBytesProcessed(state.iterations() * kBatchSize * static_cast<int64_t>(size));
 }
-BENCHMARK(BM_Malloc_Batch_MultiThread)->RangeMultiplier(2)->Range(8, 1024)->Threads(2)->Threads(4)->Threads(8);
 
-// --- Batch Multi Thread MemoryPool ---
-static void BM_MemoryPool_Batch_MultiThread(benchmark::State& state) {
-    const size_t size = state.range(0);
-    const int batch_size = 1000;
-    std::vector<void*> ptrs;
-    ptrs.reserve(batch_size);
+template <typename AllocateFn, typename DeallocateFn>
+void RunMixedSizeLoop(benchmark::State& state, AllocateFn allocate_fn, DeallocateFn deallocate_fn) {
+    std::vector<std::pair<void*, size_t>> live;
+    live.reserve(kBatchSize);
+
     for (auto _ : state) {
-        for (int i = 0; i < batch_size; ++i) {
-            ptrs.push_back(allocate(size));
+        live.clear();
+        for (int i = 0; i < kBatchSize; ++i) {
+            size_t size = static_cast<size_t>(kBenchmarkSizes[static_cast<size_t>(i) % kBenchmarkSizes.size()]);
+            void* ptr = allocate_fn(size);
+            benchmark::DoNotOptimize(ptr);
+            std::memset(ptr, i, size);
+            live.emplace_back(ptr, size);
+
+            if ((i % 4) == 3) {
+                deallocate_fn(live.back().first);
+                live.pop_back();
+            }
         }
-        for (void* ptr : ptrs) {
-            deallocate(ptr, size);
+
+        for (auto it = live.rbegin(); it != live.rend(); ++it) {
+            deallocate_fn(it->first);
         }
-        ptrs.clear();
     }
+
+    state.SetItemsProcessed(state.iterations() * kBatchSize);
 }
-BENCHMARK(BM_MemoryPool_Batch_MultiThread)->RangeMultiplier(2)->Range(8, 1024)->Threads(2)->Threads(4)->Threads(8);
+
+static void BM_MallocAllocateFree(benchmark::State& state) {
+    RunSingleObjectLoop(
+        state,
+        [](size_t size) { return std::malloc(size); },
+        [](void* ptr) { std::free(ptr); });
+}
+
+static void BM_MemoryPoolAllocateFree(benchmark::State& state) {
+    RunSingleObjectLoop(
+        state,
+        [](size_t size) { return allocate(size); },
+        [](void* ptr) { deallocate(ptr); });
+}
+
+static void BM_MallocBatch(benchmark::State& state) {
+    RunBatchLoop(
+        state,
+        [](size_t size) { return std::malloc(size); },
+        [](void* ptr) { std::free(ptr); });
+}
+
+static void BM_MemoryPoolBatch(benchmark::State& state) {
+    RunBatchLoop(
+        state,
+        [](size_t size) { return allocate(size); },
+        [](void* ptr) { deallocate(ptr); });
+}
+
+static void BM_MallocMixedSizes(benchmark::State& state) {
+    RunMixedSizeLoop(
+        state,
+        [](size_t size) { return std::malloc(size); },
+        [](void* ptr) { std::free(ptr); });
+}
+
+static void BM_MemoryPoolMixedSizes(benchmark::State& state) {
+    RunMixedSizeLoop(
+        state,
+        [](size_t size) { return allocate(size); },
+        [](void* ptr) { deallocate(ptr); });
+}
+
+BENCHMARK(BM_MallocAllocateFree)->ArgsProduct({benchmark::CreateRange(8, 1024, 2)})->UseRealTime();
+BENCHMARK(BM_MemoryPoolAllocateFree)->ArgsProduct({benchmark::CreateRange(8, 1024, 2)})->UseRealTime();
+
+BENCHMARK(BM_MallocBatch)->ArgsProduct({benchmark::CreateRange(8, 1024, 2)})->UseRealTime();
+BENCHMARK(BM_MemoryPoolBatch)->ArgsProduct({benchmark::CreateRange(8, 1024, 2)})->UseRealTime();
+
+BENCHMARK(BM_MallocAllocateFree)->ArgsProduct({benchmark::CreateRange(8, 1024, 2)})->ThreadRange(2, 8)->UseRealTime();
+BENCHMARK(BM_MemoryPoolAllocateFree)->ArgsProduct({benchmark::CreateRange(8, 1024, 2)})->ThreadRange(2, 8)->UseRealTime();
+
+BENCHMARK(BM_MallocMixedSizes)->Threads(1)->UseRealTime();
+BENCHMARK(BM_MemoryPoolMixedSizes)->Threads(1)->UseRealTime();
+BENCHMARK(BM_MallocMixedSizes)->ThreadRange(2, 8)->UseRealTime();
+BENCHMARK(BM_MemoryPoolMixedSizes)->ThreadRange(2, 8)->UseRealTime();
+
+}  // namespace
 
 BENCHMARK_MAIN();
