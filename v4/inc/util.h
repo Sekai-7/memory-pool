@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <atomic>
 #include <mutex>
+#include <bit>
 
 namespace memorypool {
 
@@ -13,9 +14,13 @@ constexpr size_t MAX_PAGES = 128;
 
 constexpr size_t ALIGNLEN = sizeof(void*);
 
+constexpr size_t MAX_SMALL_BYTES = 256;
+
 constexpr size_t DEFAULT_THRESHOLD = 8;
 
-constexpr size_t FREE_LIST_SIZE = 1024;
+constexpr size_t MAX_POOL_BYTES = 256 * 1024 * 1024;
+// 最大支持256KB的分配
+constexpr size_t FREE_LIST_SIZE = 43;
 
 constexpr size_t PAGE_SIZE = 4096;
 
@@ -27,31 +32,22 @@ constexpr size_t BITS_PER_LEVEL = 12;
 
 constexpr size_t LEVEL_LENGTH = 1ULL << BITS_PER_LEVEL;
 
-inline size_t align(size_t size) {
+inline constexpr size_t align(size_t size) noexcept {
     return (size + ALIGNLEN - 1) & ~(ALIGNLEN - 1);
 }
 
-inline uint16_t getListIndex(size_t size) {
+inline uint16_t getListIndex(size_t size) noexcept {
     // return align(size) / ALIGNLEN - 1;
-    auto alignSize = align(size);
-    if (alignSize == 8) {
+    if (size == 0) {
         return 0;
-    } else if (alignSize == 16) {
-        return 1;
-    } else if (alignSize == 32) {
-        return 2;
-    } else if (alignSize == 64) {
-        return 3;
-    } else if (alignSize == 128) {
-        return 4;
-    } else if (alignSize == 256) {
-        return 5;
-    } else if (alignSize == 512) {
-        return 6;
-    } else if (alignSize == 1024) {
-        return 7;
     }
-    return FREE_LIST_SIZE;
+    if (size <= MAX_SMALL_BYTES) {
+        return static_cast<uint16_t>(align(size) >> 3) - 1;
+    }
+    size_t alignSize = std::bit_ceil(size);
+    uint16_t baseIndex = static_cast<uint16_t>(MAX_SMALL_BYTES / ALIGNLEN);
+    uint16_t shift = 63 - std::countl_zero(alignSize);
+    return baseIndex + shift - 8;
 }
 
 template<typename T, size_t ChunkSize = 64 * 1024>
