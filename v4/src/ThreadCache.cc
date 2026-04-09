@@ -38,7 +38,14 @@ void* ThreadCache::allocate(size_t size) {
     return ret;
 }
 
-void ThreadCache::deallocate(void* ptr, size_t size) {
+void ThreadCache::deallocate(void* ptr) {
+    if (ptr == nullptr) {
+        return;
+    }
+    Span* span = RadixTreePageMap::getInstance().getSpan(reinterpret_cast<uintptr_t>(ptr));
+
+    size_t size = span->objSize;
+
     auto index = getListIndex(align(size));
 
     if (index >= FREE_LIST_SIZE) {
