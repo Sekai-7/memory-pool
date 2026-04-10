@@ -1,12 +1,20 @@
 #include "CentralCache.h"
 #include "PageCache.h"
 
+#include <algorithm>
 #include <thread>
 
 namespace memorypool {
 
+namespace {
+
+constexpr size_t kTargetSpanBytes = 64 * 1024;
+constexpr size_t kMaxObjectsPerSpan = 64;
+
+}
+
 std::byte* CentralCache::allocate(size_t size, size_t& count) {
-    size_t alignSize = align(size);
+    size_t alignSize = normalizeSize(size);
     auto index = getListIndex(alignSize);
 
     if (index >= FREE_LIST_SIZE) {
@@ -115,11 +123,21 @@ void CentralCache::deallocate(std::byte* listHead, size_t idx, size_t count) {
 }
 
 Span* CentralCache::fetchSpanFromPageCache(size_t objSize) {
-    // 由于现在设置的内存比较小，直接默认分配一页内存
-    size_t pageCount = 1;
+    size_t targetObjects = kTargetSpanBytes / objSize;
+    if (targetObjects == 0) {
+        targetObjects = 1;
+    }
+    if (targetObjects > kMaxObjectsPerSpan) {
+        targetObjects = kMaxObjectsPerSpan;
+    }
 
-    if (objSize > MAX_SMALL_BYTES) {
-        
+    const size_t targetBytes = std::max(objSize * targetObjects, PAGE_SIZE);
+    size_t pageCount = (targetBytes + PAGE_SIZE - 1) / PAGE_SIZE;
+    if (pageCount == 0) {
+        pageCount = 1;
+    }
+    if (pageCount > MAX_PAGES_IN_SPAN) {
+        pageCount = MAX_PAGES_IN_SPAN;
     }
 
     Span* span = PageCache::getInstance().allocate(pageCount);
@@ -127,25 +145,31 @@ Span* CentralCache::fetchSpanFromPageCache(size_t objSize) {
         return nullptr;
     }
 
-    pageCount = span->pageCount;
+    const size_t spanBytes = span->pageCount * PAGE_SIZE;
+    const size_t objectCount = spanBytes / objSize;
+    if (objectCount == 0) {
+        PageCache::getInstance().deallocate(span);
+        return nullptr;
+    }
 
-    std::byte* current = static_cast<std::byte*>(span->ptr);
-    span->freeList = current;
+    std::byte* head = static_cast<std::byte*>(span->ptr);
+    std::byte* current = head;
     span->useCount = 0;
     span->objSize = objSize;
+    span->isDirect = false;
+    span->isFree = false;
+    span->freeList = head;
 
-    size_t sum = pageCount * PAGE_SIZE;
-
-    for (size_t i = objSize; i < sum; i += objSize) {
-        *reinterpret_cast<std::byte**>(current) = current + objSize;
-        current += objSize; 
+    for (size_t i = 1; i < objectCount; ++i) {
+        auto* next = current + objSize;
+        *reinterpret_cast<std::byte**>(current) = next;
+        current = next;
     }
     *reinterpret_cast<std::byte**>(current) = nullptr;
 
-    for (size_t i = 0; i < pageCount; ++i) {
+    for (size_t i = 0; i < span->pageCount; ++i) {
         RadixTreePageMap::getInstance().setSpan(reinterpret_cast<uintptr_t>(static_cast<std::byte*>(span->ptr) + i * PAGE_SIZE), span);
     }
-
 
     return span;
 }

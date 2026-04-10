@@ -16,6 +16,9 @@ void RadixTreePageMap::setSpan(uintptr_t key, Span* span) {
 
     // 1. 确保 L2 节点存在
     Node* node = root_[i1].load(std::memory_order_acquire);
+    if (!node && span == nullptr) {
+        return;
+    }
     if (!node) {
         // 【关键改变】：从元数据分配器直接拿系统底层内存
         Node* new_node = NodeAllocator::getInstance().allocate();
@@ -34,6 +37,9 @@ void RadixTreePageMap::setSpan(uintptr_t key, Span* span) {
 
     // 2. 确保 L3 节点存在
     LeafNode* leaf = node->leaves[i2].load(std::memory_order_acquire);
+    if (!leaf && span == nullptr) {
+        return;
+    }
     if (!leaf) {
         // 【关键改变】：直接拿到底层内存
         LeafNode* new_leaf = LeafNodeAllocator::getInstance().allocate();
@@ -42,6 +48,7 @@ void RadixTreePageMap::setSpan(uintptr_t key, Span* span) {
         if (node->leaves[i2].compare_exchange_strong(expected, new_leaf, std::memory_order_acq_rel, std::memory_order_acquire)) {
             leaf = new_leaf;
         } else {
+            LeafNodeAllocator::getInstance().deallocate(new_leaf);
             leaf = expected;
         }
     }

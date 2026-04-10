@@ -12,7 +12,8 @@ using namespace memorypool;
 
 namespace {
 
-constexpr std::array<int, 8> kBenchmarkSizes{8, 16, 32, 64, 128, 256, 512, 1024};
+constexpr std::array<int, 11> kBenchmarkSizes{
+    8, 16, 32, 64, 128, 256, 512, 1024, 4096, 65536, 262144};
 constexpr int kBatchSize = 512;
 
 template <typename AllocateFn, typename DeallocateFn>
@@ -118,19 +119,29 @@ static void BM_MemoryPoolMixedSizes(benchmark::State& state) {
         [](void* ptr) { deallocate(ptr); });
 }
 
-BENCHMARK(BM_MallocAllocateFree)->ArgsProduct({benchmark::CreateRange(8, 1024, 2)})->UseRealTime();
-BENCHMARK(BM_MemoryPoolAllocateFree)->ArgsProduct({benchmark::CreateRange(8, 1024, 2)})->UseRealTime();
+static void BM_MemoryPoolDirectAllocateFree(benchmark::State& state) {
+    RunSingleObjectLoop(
+        state,
+        [](size_t size) { return allocate(size); },
+        [](void* ptr) { deallocate(ptr); });
+}
 
-BENCHMARK(BM_MallocBatch)->ArgsProduct({benchmark::CreateRange(8, 1024, 2)})->UseRealTime();
-BENCHMARK(BM_MemoryPoolBatch)->ArgsProduct({benchmark::CreateRange(8, 1024, 2)})->UseRealTime();
+BENCHMARK(BM_MallocAllocateFree)->ArgsProduct({benchmark::CreateRange(8, 262144, 2)})->UseRealTime();
+BENCHMARK(BM_MemoryPoolAllocateFree)->ArgsProduct({benchmark::CreateRange(8, 262144, 2)})->UseRealTime();
 
-BENCHMARK(BM_MallocAllocateFree)->ArgsProduct({benchmark::CreateRange(8, 1024, 2)})->ThreadRange(2, 8)->UseRealTime();
-BENCHMARK(BM_MemoryPoolAllocateFree)->ArgsProduct({benchmark::CreateRange(8, 1024, 2)})->ThreadRange(2, 8)->UseRealTime();
+BENCHMARK(BM_MallocBatch)->ArgsProduct({benchmark::CreateRange(8, 262144, 2)})->UseRealTime();
+BENCHMARK(BM_MemoryPoolBatch)->ArgsProduct({benchmark::CreateRange(8, 262144, 2)})->UseRealTime();
+
+BENCHMARK(BM_MallocAllocateFree)->ArgsProduct({benchmark::CreateRange(8, 262144, 2)})->ThreadRange(2, 8)->UseRealTime();
+BENCHMARK(BM_MemoryPoolAllocateFree)->ArgsProduct({benchmark::CreateRange(8, 262144, 2)})->ThreadRange(2, 8)->UseRealTime();
 
 BENCHMARK(BM_MallocMixedSizes)->Threads(1)->UseRealTime();
 BENCHMARK(BM_MemoryPoolMixedSizes)->Threads(1)->UseRealTime();
 BENCHMARK(BM_MallocMixedSizes)->ThreadRange(2, 8)->UseRealTime();
 BENCHMARK(BM_MemoryPoolMixedSizes)->ThreadRange(2, 8)->UseRealTime();
+
+BENCHMARK(BM_MemoryPoolDirectAllocateFree)->Arg(262152)->UseRealTime();
+BENCHMARK(BM_MemoryPoolDirectAllocateFree)->Arg(524288)->UseRealTime();
 
 }  // namespace
 

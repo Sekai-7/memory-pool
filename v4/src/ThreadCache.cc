@@ -1,5 +1,6 @@
 #include "util.h"
 #include "CentralCache.h"
+#include "PageCache.h"
 #include "ThreadCache.h"
 
 #include <cstdlib>
@@ -7,11 +8,11 @@
 namespace memorypool {
 
 void* ThreadCache::allocate(size_t size) {
-    auto alignSize = align(size);
+    auto alignSize = normalizeSize(size);
     auto index = getListIndex(alignSize);
 
     if (index >= FREE_LIST_SIZE) {
-        return malloc(size);
+        return nullptr;
     }
 
     if (freeList_[index] == nullptr) {
@@ -43,13 +44,20 @@ void ThreadCache::deallocate(void* ptr) {
         return;
     }
     Span* span = RadixTreePageMap::getInstance().getSpan(reinterpret_cast<uintptr_t>(ptr));
+    if (span == nullptr) {
+        return;
+    }
+
+    if (span->isDirect) {
+        PageCache::getInstance().deallocateDirect(span);
+        return;
+    }
 
     size_t size = span->objSize;
 
     auto index = getListIndex(align(size));
 
-    if (index >= FREE_LIST_SIZE) {
-        free(ptr);
+    if (index >= FREE_LIST_SIZE || size == 0) {
         return;
     }
 
@@ -59,17 +67,23 @@ void ThreadCache::deallocate(void* ptr) {
 
     if (freeListSize_[index] >= threshold_[index]) {
         size_t deallocateSize = freeListSize_[index] / 2;
-        auto* next = freeList_[index];
-        size_t count = deallocateSize;
-        while (count--) {
-            if (next == nullptr) {
-                // 要做额外处理
+        std::byte* listHead = freeList_[index];
+        std::byte* listTail = listHead;
+        for (size_t i = 1; i < deallocateSize; ++i) {
+            if (listTail == nullptr) {
                 return;
             }
-            next = *(reinterpret_cast<std::byte**>(next));
+            listTail = *(reinterpret_cast<std::byte**>(listTail));
         }
-        CentralCache::getInstance().deallocate(freeList_[index], index, freeListSize_[index] / 2);
-        freeList_[index] = next;
+        if (listTail == nullptr) {
+            return;
+        }
+
+        std::byte* remaining = *(reinterpret_cast<std::byte**>(listTail));
+        *reinterpret_cast<std::byte**>(listTail) = nullptr;
+
+        CentralCache::getInstance().deallocate(listHead, index, deallocateSize);
+        freeList_[index] = remaining;
         freeListSize_[index] -= deallocateSize;
         threshold_[index] /= 2;
     }

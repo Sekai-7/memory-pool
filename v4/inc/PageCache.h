@@ -16,8 +16,10 @@ public:
     }
 
     Span* allocate(size_t);
+    Span* allocateDirect(size_t);
 
     void deallocate(Span*);
+    void deallocateDirect(Span*);
 
     Span* requestFromOS(size_t);
 public:
@@ -31,7 +33,7 @@ private:
     ~PageCache() = default;
 
 private:
-    std::array<SpanList, MAX_PAGES> spanLists_;
+    std::array<SpanList, MAX_PAGES_IN_SPAN> spanLists_;
 
     std::mutex page_mutex_;
 };

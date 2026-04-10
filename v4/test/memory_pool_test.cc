@@ -14,12 +14,14 @@ using namespace memorypool;
 
 namespace {
 
-constexpr std::array<size_t, 8> kSupportedSizes{8, 16, 32, 64, 128, 256, 512, 1024};
+constexpr std::array<size_t, 11> kPooledSizes{
+    8, 16, 64, 256, 512, 1024, 4096, 8192, 65536, 131072, 262144};
+constexpr std::array<size_t, 2> kDirectSizes{262152, 524288};
 
 }  // namespace
 
 TEST(MemoryPoolTest, AllocatesSupportedSizeClasses) {
-    for (size_t size : kSupportedSizes) {
+    for (size_t size : kPooledSizes) {
         void* ptr = allocate(size);
         ASSERT_NE(ptr, nullptr) << "size=" << size;
         deallocate(ptr);
@@ -27,11 +29,27 @@ TEST(MemoryPoolTest, AllocatesSupportedSizeClasses) {
 }
 
 TEST(MemoryPoolTest, ReturnsAlignedPointers) {
-    for (size_t size : kSupportedSizes) {
+    for (size_t size : kPooledSizes) {
         void* ptr = allocate(size);
         ASSERT_NE(ptr, nullptr) << "size=" << size;
         EXPECT_EQ(reinterpret_cast<std::uintptr_t>(ptr) % ALIGNLEN, 0U) << "size=" << size;
         deallocate(ptr);
+    }
+}
+
+TEST(MemoryPoolTest, RoutesLargeAllocationsDirectlyToPageCache) {
+    for (size_t size : kDirectSizes) {
+        void* ptr = allocate(size);
+        ASSERT_NE(ptr, nullptr) << "size=" << size;
+
+        Span* span = RadixTreePageMap::getInstance().getSpan(reinterpret_cast<std::uintptr_t>(ptr));
+        ASSERT_NE(span, nullptr) << "size=" << size;
+        EXPECT_TRUE(span->isDirect) << "size=" << size;
+        EXPECT_EQ(span->objSize, 0U) << "size=" << size;
+
+        deallocate(ptr);
+        EXPECT_EQ(RadixTreePageMap::getInstance().getSpan(reinterpret_cast<std::uintptr_t>(ptr)), nullptr)
+            << "size=" << size;
     }
 }
 
@@ -47,6 +65,21 @@ TEST(MemoryPoolTest, PreservesWrittenData) {
 
     for (size_t i = 0; i < kSize; ++i) {
         EXPECT_EQ(ptr[i], static_cast<unsigned char>(i));
+    }
+
+    deallocate(ptr);
+}
+
+TEST(MemoryPoolTest, PreservesWrittenDataForDirectAllocation) {
+    constexpr size_t kSize = 262152;
+
+    auto* ptr = static_cast<unsigned char*>(allocate(kSize));
+    ASSERT_NE(ptr, nullptr);
+
+    std::memset(ptr, 0x5a, kSize);
+
+    for (size_t i = 0; i < kSize; ++i) {
+        EXPECT_EQ(ptr[i], 0x5a);
     }
 
     deallocate(ptr);
@@ -86,15 +119,16 @@ TEST(MemoryPoolTest, SupportsRepeatedAllocationsAndReleases) {
 TEST(MemoryPoolTest, HandlesConcurrentMixedSizeWorkload) {
     constexpr int kThreadCount = 4;
     constexpr int kOperationsPerThread = 2000;
+    constexpr std::array<size_t, 5> kMixedSizes{64, 4096, 65536, 262144, 262152};
 
     std::atomic<bool> failed{false};
 
-    auto worker = [&failed](int seed) {
+    auto worker = [&failed, &kMixedSizes](int seed) {
         std::vector<std::pair<void*, size_t>> live;
         live.reserve(kOperationsPerThread);
 
         for (int i = 0; i < kOperationsPerThread && !failed.load(); ++i) {
-            size_t size = kSupportedSizes[(static_cast<size_t>(seed) + static_cast<size_t>(i)) % kSupportedSizes.size()];
+            size_t size = kMixedSizes[(static_cast<size_t>(seed) + static_cast<size_t>(i)) % kMixedSizes.size()];
             auto* ptr = static_cast<unsigned char*>(allocate(size));
             if (ptr == nullptr) {
                 failed.store(true);
@@ -127,4 +161,16 @@ TEST(MemoryPoolTest, HandlesConcurrentMixedSizeWorkload) {
     }
 
     EXPECT_FALSE(failed.load());
+}
+
+TEST(MemoryPoolTest, ZeroByteAllocationsUseMinimumAlignedBlock) {
+    void* ptr = allocate(0);
+    ASSERT_NE(ptr, nullptr);
+
+    Span* span = RadixTreePageMap::getInstance().getSpan(reinterpret_cast<std::uintptr_t>(ptr));
+    ASSERT_NE(span, nullptr);
+    EXPECT_FALSE(span->isDirect);
+    EXPECT_EQ(span->objSize, ALIGNLEN);
+
+    deallocate(ptr);
 }

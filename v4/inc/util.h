@@ -18,11 +18,12 @@ constexpr size_t MAX_SMALL_BYTES = 256;
 
 constexpr size_t DEFAULT_THRESHOLD = 8;
 
-constexpr size_t MAX_POOL_BYTES = 256 * 1024 * 1024;
-// 最大支持256KB的分配
-constexpr size_t FREE_LIST_SIZE = 43;
-
 constexpr size_t PAGE_SIZE = 4096;
+
+// 内存池内部最大管理 256KB 的对象。
+constexpr size_t MAX_BYTES = 256 * 1024;
+
+constexpr size_t MAX_PAGES_IN_SPAN = MAX_BYTES / PAGE_SIZE;
 
 constexpr size_t SPAN_SIZE = 8;
 
@@ -36,8 +37,11 @@ inline constexpr size_t align(size_t size) noexcept {
     return (size + ALIGNLEN - 1) & ~(ALIGNLEN - 1);
 }
 
-inline uint16_t getListIndex(size_t size) noexcept {
-    // return align(size) / ALIGNLEN - 1;
+inline constexpr size_t normalizeSize(size_t size) noexcept {
+    return align(size == 0 ? ALIGNLEN : size);
+}
+
+inline constexpr uint16_t getListIndex(size_t size) noexcept {
     if (size == 0) {
         return 0;
     }
@@ -49,6 +53,8 @@ inline uint16_t getListIndex(size_t size) noexcept {
     uint16_t shift = 63 - std::countl_zero(alignSize);
     return baseIndex + shift - 8;
 }
+
+constexpr size_t FREE_LIST_SIZE = getListIndex(MAX_BYTES) + 1;
 
 template<typename T, size_t ChunkSize = 64 * 1024>
 class MetaDataAllocator {
@@ -132,6 +138,7 @@ public:
     size_t pageCount{0};        // Span 包含的连续物理页数量
     size_t objSize{0};          // 切分的目标对象大小 (Size Class)
     bool isFree = true;         // Span当前是否被CentralCache使用
+    bool isDirect = false;      // 是否为直通大对象 Span
     
     size_t useCount{0};         // 核心状态：已分配给 ThreadCache 的对象数量
     std::byte* freeList{nullptr}; // 核心状态：内部尚未分配（或已归还）的空闲对象单向链表
@@ -195,11 +202,23 @@ private:
 
 class LeafNode {
 public:
+    LeafNode() {
+        for (auto& span : spans) {
+            span.store(nullptr, std::memory_order_relaxed);
+        }
+    }
+
     std::atomic<Span*> spans[LEVEL_LENGTH];
 };
 
 class Node {
 public:
+    Node() {
+        for (auto& leaf : leaves) {
+            leaf.store(nullptr, std::memory_order_relaxed);
+        }
+    }
+
     std::atomic<LeafNode*> leaves[LEVEL_LENGTH];
 };
 
