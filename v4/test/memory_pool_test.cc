@@ -7,6 +7,7 @@
 #include <atomic>
 #include <cstddef>
 #include <cstring>
+#include <limits>
 #include <thread>
 #include <vector>
 
@@ -173,4 +174,9 @@ TEST(MemoryPoolTest, ZeroByteAllocationsUseMinimumAlignedBlock) {
     EXPECT_EQ(span->objSize, ALIGNLEN);
 
     deallocate(ptr);
+}
+
+TEST(MemoryPoolTest, RejectsSizesThatOverflowNormalizationOrPageCount) {
+    EXPECT_EQ(allocate(std::numeric_limits<size_t>::max()), nullptr);
+    EXPECT_EQ(allocate(std::numeric_limits<size_t>::max() - ALIGNLEN), nullptr);
 }

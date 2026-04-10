@@ -8,8 +8,14 @@
 
 namespace memorypool {
     inline void* allocate(size_t size) {
-        const size_t normalizedSize = normalizeSize(size);
+        size_t normalizedSize = 0;
+        if (!normalizeSizeChecked(size, normalizedSize)) {
+            return nullptr;
+        }
         if (normalizedSize > MAX_BYTES) {
+            if (normalizedSize > std::numeric_limits<size_t>::max() - (PAGE_SIZE - 1)) {
+                return nullptr;
+            }
             const size_t pageCount = (normalizedSize + PAGE_SIZE - 1) / PAGE_SIZE;
             auto* span = PageCache::getInstance().allocateDirect(pageCount);
             return span == nullptr ? nullptr : span->ptr;

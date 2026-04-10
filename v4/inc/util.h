@@ -7,6 +7,7 @@
 #include <atomic>
 #include <mutex>
 #include <bit>
+#include <limits>
 
 namespace memorypool {
 
@@ -39,6 +40,15 @@ inline constexpr size_t align(size_t size) noexcept {
 
 inline constexpr size_t normalizeSize(size_t size) noexcept {
     return align(size == 0 ? ALIGNLEN : size);
+}
+
+inline constexpr bool normalizeSizeChecked(size_t size, size_t& normalizedSize) noexcept {
+    const size_t requestedSize = size == 0 ? ALIGNLEN : size;
+    if (requestedSize > std::numeric_limits<size_t>::max() - (ALIGNLEN - 1)) {
+        return false;
+    }
+    normalizedSize = align(requestedSize);
+    return true;
 }
 
 inline constexpr uint16_t getListIndex(size_t size) noexcept {
@@ -229,7 +239,7 @@ public:
         return instance;
     }
 
-    void setSpan(uintptr_t, Span*);
+    bool setSpan(uintptr_t, Span*);
     Span* getSpan(uintptr_t);
 
 private:

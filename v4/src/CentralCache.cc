@@ -14,7 +14,10 @@ constexpr size_t kMaxObjectsPerSpan = 64;
 }
 
 std::byte* CentralCache::allocate(size_t size, size_t& count) {
-    size_t alignSize = normalizeSize(size);
+    size_t alignSize = 0;
+    if (!normalizeSizeChecked(size, alignSize)) {
+        return nullptr;
+    }
     auto index = getListIndex(alignSize);
 
     if (index >= FREE_LIST_SIZE) {

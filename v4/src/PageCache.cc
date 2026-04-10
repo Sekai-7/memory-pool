@@ -1,8 +1,74 @@
 #include "PageCache.h"
 
 #include <sys/mman.h>
+#include <limits>
 
 namespace memorypool {
+
+namespace {
+
+bool checkedPageBytes(size_t pageCount, size_t& byteCount) {
+    if (pageCount == 0 || pageCount > std::numeric_limits<size_t>::max() / PAGE_SIZE) {
+        return false;
+    }
+    byteCount = pageCount * PAGE_SIZE;
+    return true;
+}
+
+void clearSpanMap(void* ptr, size_t pageCount) {
+    const uintptr_t startAddr = reinterpret_cast<uintptr_t>(ptr);
+    for (size_t i = 0; i < pageCount; ++i) {
+        RadixTreePageMap::getInstance().setSpan(startAddr + i * PAGE_SIZE, nullptr);
+    }
+}
+
+bool registerSpanMap(Span* span) {
+    const uintptr_t startAddr = reinterpret_cast<uintptr_t>(span->ptr);
+    for (size_t i = 0; i < span->pageCount; ++i) {
+        const uintptr_t pageAddr = startAddr + i * PAGE_SIZE;
+        if (!RadixTreePageMap::getInstance().setSpan(pageAddr, span)) {
+            clearSpanMap(span->ptr, i);
+            return false;
+        }
+    }
+    return true;
+}
+
+Span* createSpanFromOS(size_t pageCount, bool isFree, bool isDirect) {
+    size_t byteCount = 0;
+    if (!checkedPageBytes(pageCount, byteCount)) {
+        return nullptr;
+    }
+
+    void* ptr = mmap(nullptr, byteCount, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (ptr == MAP_FAILED) {
+        return nullptr;
+    }
+
+    Span* span = SpanAllocator::getInstance().allocate();
+    if (span == nullptr) {
+        munmap(ptr, byteCount);
+        return nullptr;
+    }
+
+    span->ptr = ptr;
+    span->pageCount = pageCount;
+    span->objSize = 0;
+    span->isFree = isFree;
+    span->isDirect = isDirect;
+    span->useCount = 0;
+    span->freeList = nullptr;
+
+    if (!registerSpanMap(span)) {
+        munmap(ptr, byteCount);
+        SpanAllocator::getInstance().deallocate(span);
+        return nullptr;
+    }
+
+    return span;
+}
+
+} // namespace
 
 Span* PageCache::allocate(size_t pageCount) {
     if (pageCount == 0) {
@@ -63,36 +129,7 @@ Span* PageCache::allocate(size_t pageCount) {
 }
 
 Span* PageCache::allocateDirect(size_t pageCount) {
-    if (pageCount == 0) {
-        return nullptr;
-    }
-
-    void* ptr = mmap(nullptr, pageCount * PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    if (ptr == MAP_FAILED) {
-        return nullptr;
-    }
-
-    Span* span = SpanAllocator::getInstance().allocate();
-    if (span == nullptr) {
-        munmap(ptr, pageCount * PAGE_SIZE);
-        return nullptr;
-    }
-
-    span->ptr = ptr;
-    span->pageCount = pageCount;
-    span->objSize = 0;
-    span->isFree = false;
-    span->isDirect = true;
-    span->useCount = 0;
-    span->freeList = nullptr;
-
-    uintptr_t startAddr = reinterpret_cast<uintptr_t>(ptr);
-    for (size_t i = 0; i < pageCount; ++i) {
-        auto pageAddr = static_cast<uintptr_t>(startAddr + i * PAGE_SIZE);
-        RadixTreePageMap::getInstance().setSpan(pageAddr, span);
-    }
-
-    return span;
+    return createSpanFromOS(pageCount, false, true);
 }
 
 void PageCache::deallocate(Span* span) {
@@ -159,35 +196,15 @@ void PageCache::deallocateDirect(Span* span) {
         RadixTreePageMap::getInstance().setSpan(startAddr + i * PAGE_SIZE, nullptr);
     }
 
-    munmap(span->ptr, span->pageCount * PAGE_SIZE);
+    size_t byteCount = 0;
+    if (checkedPageBytes(span->pageCount, byteCount)) {
+        munmap(span->ptr, byteCount);
+    }
     SpanAllocator::getInstance().deallocate(span);
 }
 
 Span* PageCache::requestFromOS(size_t pageCount) {
-    void* ptr = mmap(nullptr, pageCount * PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    if (ptr != MAP_FAILED) {
-        Span* ret = SpanAllocator::getInstance().allocate();
-        if (ret == nullptr) {
-            munmap(ptr, pageCount * PAGE_SIZE);
-            return nullptr;
-        }
-        ret->ptr = ptr;
-        ret->pageCount = pageCount;
-        ret->objSize = 0;
-        ret->isFree = true;
-        ret->isDirect = false;
-        ret->useCount = 0;
-        ret->freeList = nullptr;
-
-        uintptr_t startAddr = reinterpret_cast<uintptr_t>(ptr);
-        for (size_t i = 0; i < pageCount; ++i) {
-            auto pageAddr = static_cast<uintptr_t>(startAddr + i * PAGE_SIZE);
-            RadixTreePageMap::getInstance().setSpan(pageAddr, ret);
-        }
-
-        return ret;
-    }
-    return nullptr;
+    return createSpanFromOS(pageCount, true, false);
 }
 
 // PageCache::~PageCache() {

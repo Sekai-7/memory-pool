@@ -21,7 +21,6 @@ public:
     void deallocate(Span*);
     void deallocateDirect(Span*);
 
-    Span* requestFromOS(size_t);
 public:
     PageCache(const PageCache&) = delete;
     PageCache& operator=(const PageCache&) = delete;
@@ -31,6 +30,8 @@ public:
 private:
     PageCache() = default;
     ~PageCache() = default;
+
+    Span* requestFromOS(size_t);
 
 private:
     std::array<SpanList, MAX_PAGES_IN_SPAN> spanLists_;
