@@ -254,6 +254,11 @@ private:
     std::atomic<Node*> root_[LEVEL_LENGTH];
 };
 
+#ifdef MEMORY_POOL_ENABLE_UNIT_TEST_HOOKS
+void failNextNonNullSetSpanAfter(size_t successfulWrites);
+void resetSetSpanFailureInjection();
+#endif
+
 using SpanAllocator = MetaDataAllocator<Span, 2 * 1024 * 1024>;
 
 using NodeAllocator = MetaDataAllocator<Node, 1024 * 1024>;

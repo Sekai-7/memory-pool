@@ -7,7 +7,50 @@
 
 namespace memorypool {
 
+#ifdef MEMORY_POOL_ENABLE_UNIT_TEST_HOOKS
+namespace {
+
+constexpr size_t kNoSetSpanFailure = std::numeric_limits<size_t>::max();
+std::atomic<size_t> g_fail_after_nonnull_sets{kNoSetSpanFailure};
+
+}
+
+void failNextNonNullSetSpanAfter(size_t successfulWrites) {
+    g_fail_after_nonnull_sets.store(successfulWrites, std::memory_order_release);
+}
+
+void resetSetSpanFailureInjection() {
+    g_fail_after_nonnull_sets.store(kNoSetSpanFailure, std::memory_order_release);
+}
+#endif
+
 bool RadixTreePageMap::setSpan(uintptr_t key, Span* span) {
+#ifdef MEMORY_POOL_ENABLE_UNIT_TEST_HOOKS
+    if (span != nullptr) {
+        size_t remaining = g_fail_after_nonnull_sets.load(std::memory_order_acquire);
+        while (remaining != kNoSetSpanFailure) {
+            if (remaining == 0) {
+                if (g_fail_after_nonnull_sets.compare_exchange_weak(
+                        remaining,
+                        kNoSetSpanFailure,
+                        std::memory_order_acq_rel,
+                        std::memory_order_acquire)) {
+                    return false;
+                }
+                continue;
+            }
+
+            if (g_fail_after_nonnull_sets.compare_exchange_weak(
+                    remaining,
+                    remaining - 1,
+                    std::memory_order_acq_rel,
+                    std::memory_order_acquire)) {
+                break;
+            }
+        }
+    }
+#endif
+
     auto pageId = key >> PAGE_SHIFT;
 
     size_t i1 = (pageId >> (BITS_PER_LEVEL * 2)) & (LEVEL_LENGTH - 1);

@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 
 #include "Allocator.h"
+#include "CentralCache.h"
+#include "PageCache.h"
 #include "util.h"
 
 #include <array>
@@ -18,6 +20,13 @@ namespace {
 constexpr std::array<size_t, 11> kPooledSizes{
     8, 16, 64, 256, 512, 1024, 4096, 8192, 65536, 131072, 262144};
 constexpr std::array<size_t, 2> kDirectSizes{262152, 524288};
+
+class SetSpanFailureInjectionGuard {
+public:
+    ~SetSpanFailureInjectionGuard() {
+        resetSetSpanFailureInjection();
+    }
+};
 
 }  // namespace
 
@@ -179,4 +188,41 @@ TEST(MemoryPoolTest, ZeroByteAllocationsUseMinimumAlignedBlock) {
 TEST(MemoryPoolTest, RejectsSizesThatOverflowNormalizationOrPageCount) {
     EXPECT_EQ(allocate(std::numeric_limits<size_t>::max()), nullptr);
     EXPECT_EQ(allocate(std::numeric_limits<size_t>::max() - ALIGNLEN), nullptr);
+}
+
+TEST(MemoryPoolTest, PageCacheSplitRollbackOnSetSpanFailure) {
+    SetSpanFailureInjectionGuard guard;
+
+    Span* fullSpan = PageCache::getInstance().allocate(MAX_PAGES_IN_SPAN);
+    ASSERT_NE(fullSpan, nullptr);
+    void* expectedPtr = fullSpan->ptr;
+    PageCache::getInstance().deallocate(fullSpan);
+
+    failNextNonNullSetSpanAfter(0);
+    EXPECT_EQ(PageCache::getInstance().allocate(1), nullptr);
+
+    Span* recovered = PageCache::getInstance().allocate(MAX_PAGES_IN_SPAN);
+    ASSERT_NE(recovered, nullptr);
+    EXPECT_EQ(recovered->ptr, expectedPtr);
+    EXPECT_EQ(RadixTreePageMap::getInstance().getSpan(reinterpret_cast<std::uintptr_t>(expectedPtr)), recovered);
+    PageCache::getInstance().deallocate(recovered);
+}
+
+TEST(MemoryPoolTest, CentralCacheFetchRollbackOnSetSpanFailure) {
+    SetSpanFailureInjectionGuard guard;
+
+    Span* pageSpan = PageCache::getInstance().allocate(1);
+    ASSERT_NE(pageSpan, nullptr);
+    void* expectedPtr = pageSpan->ptr;
+    PageCache::getInstance().deallocate(pageSpan);
+
+    size_t count = 1;
+    failNextNonNullSetSpanAfter(1);
+    EXPECT_EQ(CentralCache::getInstance().allocate(24, count), nullptr);
+
+    Span* recovered = PageCache::getInstance().allocate(1);
+    ASSERT_NE(recovered, nullptr);
+    EXPECT_EQ(recovered->ptr, expectedPtr);
+    EXPECT_EQ(RadixTreePageMap::getInstance().getSpan(reinterpret_cast<std::uintptr_t>(expectedPtr)), recovered);
+    PageCache::getInstance().deallocate(recovered);
 }

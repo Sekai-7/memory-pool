@@ -11,6 +11,16 @@ namespace {
 constexpr size_t kTargetSpanBytes = 64 * 1024;
 constexpr size_t kMaxObjectsPerSpan = 64;
 
+bool remapSpanPages(Span* span) {
+    const uintptr_t startAddr = reinterpret_cast<uintptr_t>(span->ptr);
+    for (size_t i = 0; i < span->pageCount; ++i) {
+        if (!RadixTreePageMap::getInstance().setSpan(startAddr + i * PAGE_SIZE, span)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 }
 
 std::byte* CentralCache::allocate(size_t size, size_t& count) {
@@ -170,8 +180,9 @@ Span* CentralCache::fetchSpanFromPageCache(size_t objSize) {
     }
     *reinterpret_cast<std::byte**>(current) = nullptr;
 
-    for (size_t i = 0; i < span->pageCount; ++i) {
-        RadixTreePageMap::getInstance().setSpan(reinterpret_cast<uintptr_t>(static_cast<std::byte*>(span->ptr) + i * PAGE_SIZE), span);
+    if (!remapSpanPages(span)) {
+        PageCache::getInstance().deallocate(span);
+        return nullptr;
     }
 
     return span;

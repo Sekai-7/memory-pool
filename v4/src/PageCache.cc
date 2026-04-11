@@ -34,6 +34,24 @@ bool registerSpanMap(Span* span) {
     return true;
 }
 
+bool assignSpanMap(void* ptr, size_t pageCount, Span* span, size_t& mappedPages) {
+    const uintptr_t startAddr = reinterpret_cast<uintptr_t>(ptr);
+    for (; mappedPages < pageCount; ++mappedPages) {
+        const uintptr_t pageAddr = startAddr + mappedPages * PAGE_SIZE;
+        if (!RadixTreePageMap::getInstance().setSpan(pageAddr, span)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void restoreSpanMap(void* ptr, size_t pageCount, Span* span) {
+    const uintptr_t startAddr = reinterpret_cast<uintptr_t>(ptr);
+    for (size_t i = 0; i < pageCount; ++i) {
+        RadixTreePageMap::getInstance().setSpan(startAddr + i * PAGE_SIZE, span);
+    }
+}
+
 Span* createSpanFromOS(size_t pageCount, bool isFree, bool isDirect) {
     size_t byteCount = 0;
     if (!checkedPageBytes(pageCount, byteCount)) {
@@ -93,20 +111,27 @@ Span* PageCache::allocate(size_t pageCount) {
                     spanLists_[idx].pushFront(ret);
                     return nullptr;
                 }
+
                 splice->isDirect = false;
                 splice->isFree = true;
                 splice->objSize = 0;
                 splice->useCount = 0;
                 splice->freeList = nullptr;
+                splice->prev = nullptr;
+                splice->next = nullptr;
                 splice->pageCount = ret->pageCount - pageCount;
                 splice->ptr = static_cast<std::byte*>(ret->ptr) + pageCount * PAGE_SIZE;
-                spanLists_[splice->pageCount - 1].pushFront(splice);
-                ret->pageCount = pageCount;
-                uintptr_t spliceAddr = reinterpret_cast<uintptr_t>(splice->ptr);
-                for (size_t i = 0; i < splice->pageCount; ++i) {
-                    auto pageAddr = static_cast<uintptr_t>(spliceAddr) + i * PAGE_SIZE;
-                    RadixTreePageMap::getInstance().setSpan(pageAddr, splice);
+
+                size_t mappedPages = 0;
+                if (!assignSpanMap(splice->ptr, splice->pageCount, splice, mappedPages)) {
+                    restoreSpanMap(splice->ptr, mappedPages, ret);
+                    SpanAllocator::getInstance().deallocate(splice);
+                    spanLists_[idx].pushFront(ret);
+                    return nullptr;
                 }
+
+                ret->pageCount = pageCount;
+                spanLists_[splice->pageCount - 1].pushFront(splice);
             }
             ret->isFree = false;
             ret->isDirect = false;
