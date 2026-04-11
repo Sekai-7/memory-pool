@@ -9,6 +9,46 @@
 
 内存池在实际的项目开发中较为常见，这次从学习的角度带大家去高效了解和学习内存池项目。
 
+## 构建说明
+
+当前可运行的版本在 `v4/` 目录下，下面的命令都以仓库根目录为起点。
+
+### 编译 Release 版本
+
+如果你只想编译主程序 `memory_pool`，并且不需要单元测试钩子，使用：
+
+```bash
+cmake -S v4 -B v4/build-release -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+cmake --build v4/build-release --target memory_pool
+```
+
+编译完成后，可执行文件位置：
+
+```bash
+./v4/build-release/memory_pool
+```
+
+### 编译 Unit Test 版本
+
+如果你需要编译并运行单元测试，需要显式打开测试钩子：
+
+```bash
+cmake -S v4 -B v4/build-test -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DMEMORY_POOL_ENABLE_UNIT_TEST_HOOKS=ON
+cmake --build v4/build-test --target memory_pool_test
+```
+
+运行单元测试：
+
+```bash
+./v4/build-test/test/memory_pool_test
+```
+
+### 说明
+
+* `MEMORY_POOL_ENABLE_UNIT_TEST_HOOKS` 只给单元测试版本使用，Release 版本不需要开启。
+* `BUILD_TESTING=OFF` 时不会进入 `v4/test/`，适合正式构建。
+* `BUILD_TESTING=ON` 但没有开启 `MEMORY_POOL_ENABLE_UNIT_TEST_HOOKS=ON` 时，单元测试目标会报错，这是预期行为。
+
 ## 什么是内存池？
 
 内存池是一种预分配内存并进行重复利用的技术，通过减少频繁的动态内存分配与释放操作，从而提高程序运行效率。
@@ -116,4 +156,3 @@
 ## 获取本项目专栏
 
 **本文档仅为星球内部专享，大家可以加入[知识星球](./kstar.md)里获取，在星球置顶一**
-

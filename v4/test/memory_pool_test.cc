@@ -173,6 +173,48 @@ TEST(MemoryPoolTest, HandlesConcurrentMixedSizeWorkload) {
     EXPECT_FALSE(failed.load());
 }
 
+TEST(MemoryPoolTest, HandlesConcurrentDifferentSizeClassWorkload) {
+    constexpr std::array<size_t, 4> kSizes{32, 64, 256, 4096};
+    constexpr int kOperationsPerThread = 2000;
+
+    std::atomic<bool> failed{false};
+
+    auto worker = [&failed](size_t size) {
+        std::vector<void*> ptrs;
+        ptrs.reserve(kOperationsPerThread);
+
+        for (int i = 0; i < kOperationsPerThread && !failed.load(); ++i) {
+            void* ptr = allocate(size);
+            if (ptr == nullptr) {
+                failed.store(true);
+                break;
+            }
+            ptrs.push_back(ptr);
+
+            if ((i % 4) == 3) {
+                deallocate(ptrs.back());
+                ptrs.pop_back();
+            }
+        }
+
+        for (auto it = ptrs.rbegin(); it != ptrs.rend(); ++it) {
+            deallocate(*it);
+        }
+    };
+
+    std::vector<std::thread> threads;
+    threads.reserve(kSizes.size());
+    for (size_t size : kSizes) {
+        threads.emplace_back(worker, size);
+    }
+
+    for (auto& thread : threads) {
+        thread.join();
+    }
+
+    EXPECT_FALSE(failed.load());
+}
+
 TEST(MemoryPoolTest, ZeroByteAllocationsUseMinimumAlignedBlock) {
     void* ptr = allocate(0);
     ASSERT_NE(ptr, nullptr);

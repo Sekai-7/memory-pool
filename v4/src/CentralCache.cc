@@ -21,6 +21,16 @@ bool remapSpanPages(Span* span) {
     return true;
 }
 
+void lockBucket(std::atomic_flag& lock) {
+    while (lock.test_and_set(std::memory_order_acquire)) {
+        std::this_thread::yield();
+    }
+}
+
+void unlockBucket(std::atomic_flag& lock) {
+    lock.clear(std::memory_order_release);
+}
+
 }
 
 std::byte* CentralCache::allocate(size_t size, size_t& count) {
@@ -34,13 +44,12 @@ std::byte* CentralCache::allocate(size_t size, size_t& count) {
         return nullptr;
     }
 
-    while (locks_[index].test_and_set(std::memory_order_acquire)) {
-        std::this_thread::yield();
-    }
+    auto& bucket = buckets_[index];
+    lockBucket(bucket.lock);
 
-    Span* span = nonempty_[index].front();
+    Span* span = bucket.nonempty.front();
     if (span == nullptr) {
-        locks_[index].clear(std::memory_order_release);
+        unlockBucket(bucket.lock);
 
         span = fetchSpanFromPageCache(alignSize);
 
@@ -48,10 +57,8 @@ std::byte* CentralCache::allocate(size_t size, size_t& count) {
             return nullptr;
         }
 
-        while (locks_[index].test_and_set(std::memory_order_acquire)) {
-            std::this_thread::yield();
-        }
-        nonempty_[index].pushFront(span);
+        lockBucket(bucket.lock);
+        bucket.nonempty.pushFront(span);
     }
 
     std::byte* head = span->freeList;
@@ -70,10 +77,10 @@ std::byte* CentralCache::allocate(size_t size, size_t& count) {
     span->useCount += actualCount;                  
 
     if (span->freeList == nullptr) {
-        nonempty_[index].remove(span);
+        bucket.nonempty.remove(span);
     }
 
-    locks_[index].clear(std::memory_order_release);
+    unlockBucket(bucket.lock);
 
     count = actualCount;
 
@@ -91,9 +98,8 @@ void CentralCache::deallocate(std::byte* listHead, size_t idx, size_t count) {
         return;
     }
 
-    while (locks_[index].test_and_set(std::memory_order_acquire)) {
-        std::this_thread::yield();
-    }
+    auto& bucket = buckets_[index];
+    lockBucket(bucket.lock);
 
     std::byte* current = listHead;
 
@@ -112,25 +118,23 @@ void CentralCache::deallocate(std::byte* listHead, size_t idx, size_t count) {
         span->useCount--;
 
         if (wasEmpty) {
-            nonempty_[index].pushFront(span);
+            bucket.nonempty.pushFront(span);
         }
 
         if (span->useCount == 0) {
-            nonempty_[index].remove(span);
-            locks_[index].clear(std::memory_order_release);
+            bucket.nonempty.remove(span);
+            unlockBucket(bucket.lock);
 
             // 先不做处理
             PageCache::getInstance().deallocate(span);
 
-            while (locks_[index].test_and_set(std::memory_order_acquire)) {
-                std::this_thread::yield();
-            }
+            lockBucket(bucket.lock);
         }
 
         current = next;
     }
 
-    locks_[index].clear(std::memory_order_release);
+    unlockBucket(bucket.lock);
 
     return;
 }

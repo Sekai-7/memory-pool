@@ -5,7 +5,6 @@
 
 #include <cstddef>
 #include <array>
-#include <memory>
 #include <cstdint>
 #include <atomic>
 
@@ -13,6 +12,8 @@ namespace memorypool {
 
 class CentralCache {
 public:
+    static constexpr size_t kCacheLineSize = 64;
+
     static CentralCache& getInstance() {
         static CentralCache instance;
         return instance;
@@ -28,9 +29,14 @@ public:
     CentralCache& operator=(CentralCache&&) = delete;
 
 private:
+    struct alignas(kCacheLineSize) Bucket {
+        SpanList nonempty;
+        std::atomic_flag lock = ATOMIC_FLAG_INIT;
+    };
+
     CentralCache() {
-        for (auto& lock : locks_) {
-            lock.clear();
+        for (auto& bucket : buckets_) {
+            bucket.lock.clear();
         }
     }
     ~CentralCache() = default;
@@ -38,9 +44,7 @@ private:
     Span* fetchSpanFromPageCache(size_t objSize);
 
 private:
-    std::array<SpanList, FREE_LIST_SIZE> nonempty_;
-
-    std::array<std::atomic_flag, FREE_LIST_SIZE> locks_;
+    std::array<Bucket, FREE_LIST_SIZE> buckets_;
 };
 
 }
