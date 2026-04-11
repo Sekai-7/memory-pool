@@ -24,12 +24,16 @@ public:
     ThreadCache(ThreadCache&&) = delete;
     ThreadCache& operator=(ThreadCache&&) = delete;
 
-    ThreadCache() = default;
+private:
+    ThreadCache() {
+        threshold_.fill(DEFAULT_THRESHOLD);
+    }
     ~ThreadCache();
 
 private:
     std::array<std::byte*, FREE_LIST_SIZE> freeList_ = {};
     std::array<size_t, FREE_LIST_SIZE> freeListSize_ = {};
+    std::array<size_t, FREE_LIST_SIZE> threshold_ = {};
 };
 
 }

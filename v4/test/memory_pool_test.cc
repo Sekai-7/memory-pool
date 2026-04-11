@@ -307,18 +307,6 @@ TEST(MemoryPoolTest, ListIndexLookupMatchesReferenceMapping) {
     }
 }
 
-TEST(MemoryPoolTest, TargetFreeListLookupMatchesPolicy) {
-    for (size_t index = 0; index < FREE_LIST_SIZE; ++index) {
-        const size_t classSize = kClassSizeTable[index];
-        if (classSize == 0) {
-            EXPECT_EQ(getTargetFreeListSizeForIndex(index), 0U) << "index=" << index;
-            continue;
-        }
-        EXPECT_EQ(getTargetFreeListSizeForIndex(index), getTargetFreeListSizeForClassSize(classSize))
-            << "index=" << index << " classSize=" << classSize;
-    }
-}
-
 TEST(MemoryPoolTest, PageCacheSplitRollbackOnSetSpanFailure) {
     SetSpanFailureInjectionGuard guard;
 

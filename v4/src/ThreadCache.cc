@@ -4,6 +4,7 @@
 #include "ThreadCache.h"
 
 #include <cstdlib>
+#include <limits>
 
 namespace memorypool {
 
@@ -18,7 +19,10 @@ void* ThreadCache::allocate(size_t normalizedSize) {
     }
 
     if (freeList_[index] == nullptr) {
-        size_t count = getTargetFreeListSizeForIndex(index);
+        if (threshold_[index] == 0) {
+            threshold_[index] = DEFAULT_THRESHOLD;
+        }
+        size_t count = threshold_[index];
         
         // 从CentralCache申请内存并且分割
         // 中心缓存的分配采取尽力
@@ -30,6 +34,10 @@ void* ThreadCache::allocate(size_t normalizedSize) {
 
         freeList_[index] = applyMemory;
         freeListSize_[index] = count;
+
+        if (threshold_[index] <= std::numeric_limits<size_t>::max() / 2) {
+            threshold_[index] *= 2;
+        }
     }
 
     void* ret = static_cast<void*>(freeList_[index]);
@@ -65,19 +73,18 @@ void ThreadCache::deallocate(void* ptr) {
     freeList_[index] = static_cast<std::byte*>(ptr);
     freeListSize_[index]++;
 
-    const size_t targetFreeListSize = getTargetFreeListSizeForIndex(index);
+    if (threshold_[index] == 0) {
+        threshold_[index] = DEFAULT_THRESHOLD;
+    }
 
-    if (freeListSize_[index] > targetFreeListSize) {
-        size_t keepCount = targetFreeListSize;
+    if (freeListSize_[index] >= threshold_[index]) {
+        size_t deallocateSize = freeListSize_[index] / 2;
         std::byte* listHead = freeList_[index];
         std::byte* listTail = listHead;
-        if (keepCount == 0) {
-            CentralCache::getInstance().deallocate(listHead, index, freeListSize_[index]);
-            freeList_[index] = nullptr;
-            freeListSize_[index] = 0;
+        if (deallocateSize == 0) {
             return;
         }
-        for (size_t i = 1; i < keepCount; ++i) {
+        for (size_t i = 1; i < deallocateSize; ++i) {
             if (listTail == nullptr) {
                 return;
             }
@@ -87,12 +94,12 @@ void ThreadCache::deallocate(void* ptr) {
             return;
         }
 
-        std::byte* flushHead = *(reinterpret_cast<std::byte**>(listTail));
+        std::byte* remaining = *(reinterpret_cast<std::byte**>(listTail));
         *reinterpret_cast<std::byte**>(listTail) = nullptr;
-        const size_t flushCount = freeListSize_[index] - keepCount;
-
-        CentralCache::getInstance().deallocate(flushHead, index, flushCount);
-        freeListSize_[index] = keepCount;
+        CentralCache::getInstance().deallocate(listHead, index, deallocateSize);
+        freeList_[index] = remaining;
+        freeListSize_[index] -= deallocateSize;
+        threshold_[index] = threshold_[index] / 2 < DEFAULT_THRESHOLD ? DEFAULT_THRESHOLD : threshold_[index] / 2;
     }
 
     return;
