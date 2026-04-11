@@ -20,6 +20,7 @@ namespace {
 constexpr std::array<size_t, 11> kPooledSizes{
     8, 16, 64, 256, 512, 1024, 4096, 8192, 65536, 131072, 262144};
 constexpr std::array<size_t, 2> kDirectSizes{262152, 524288};
+constexpr size_t kPageCacheDrainSpanCount = 32;
 
 class SetSpanFailureInjectionGuard {
 public:
@@ -27,6 +28,20 @@ public:
         resetSetSpanFailureInjection();
     }
 };
+
+std::vector<Span*> ReserveFullPageCacheSpans(size_t count = kPageCacheDrainSpanCount) {
+    std::vector<Span*> spans;
+    spans.reserve(count);
+    for (size_t i = 0; i < count; ++i) {
+        Span* span = PageCache::getInstance().allocate(MAX_PAGES_IN_SPAN);
+        EXPECT_NE(span, nullptr);
+        if (span == nullptr) {
+            break;
+        }
+        spans.push_back(span);
+    }
+    return spans;
+}
 
 }  // namespace
 
@@ -267,4 +282,82 @@ TEST(MemoryPoolTest, CentralCacheFetchRollbackOnSetSpanFailure) {
     EXPECT_EQ(recovered->ptr, expectedPtr);
     EXPECT_EQ(RadixTreePageMap::getInstance().getSpan(reinterpret_cast<std::uintptr_t>(expectedPtr)), recovered);
     PageCache::getInstance().deallocate(recovered);
+}
+
+TEST(MemoryPoolTest, FreeSpanBelowThresholdIsNotReleasedToOS) {
+    auto held = ReserveFullPageCacheSpans();
+    ASSERT_EQ(held.size(), kPageCacheDrainSpanCount);
+
+    Span* span = held.back();
+    held.pop_back();
+    ASSERT_NE(span, nullptr);
+    void* ptr = span->ptr;
+
+    PageCache::getInstance().deallocate(span);
+
+    Span* freeSpan = RadixTreePageMap::getInstance().getSpan(reinterpret_cast<std::uintptr_t>(ptr));
+    ASSERT_NE(freeSpan, nullptr);
+    EXPECT_FALSE(freeSpan->isReleasedToOS);
+    EXPECT_TRUE(freeSpan->isOsChunkHead);
+
+    Span* recovered = PageCache::getInstance().allocate(MAX_PAGES_IN_SPAN);
+    ASSERT_NE(recovered, nullptr);
+    EXPECT_EQ(recovered->ptr, ptr);
+    held.push_back(recovered);
+
+    for (Span* heldSpan : held) {
+        PageCache::getInstance().deallocate(heldSpan);
+    }
+}
+
+TEST(MemoryPoolTest, ScavengerReleasesFreeSpanToOSAndReusesIt) {
+    auto held = ReserveFullPageCacheSpans();
+    ASSERT_EQ(held.size(), kPageCacheDrainSpanCount);
+
+    std::array<void*, 5> ptrs{};
+    for (size_t i = 0; i < ptrs.size(); ++i) {
+        ptrs[i] = held.back()->ptr;
+        PageCache::getInstance().deallocate(held.back());
+        held.pop_back();
+    }
+
+    Span* released = RadixTreePageMap::getInstance().getSpan(reinterpret_cast<std::uintptr_t>(ptrs.back()));
+    ASSERT_NE(released, nullptr);
+    EXPECT_TRUE(released->isReleasedToOS);
+    EXPECT_TRUE(released->isOsChunkHead);
+
+    Span* reused = PageCache::getInstance().allocate(MAX_PAGES_IN_SPAN);
+    ASSERT_NE(reused, nullptr);
+    EXPECT_EQ(reused->ptr, ptrs.back());
+    EXPECT_FALSE(reused->isReleasedToOS);
+    held.push_back(reused);
+
+    for (size_t i = 0; i + 1 < ptrs.size(); ++i) {
+        Span* span = PageCache::getInstance().allocate(MAX_PAGES_IN_SPAN);
+        ASSERT_NE(span, nullptr);
+        EXPECT_EQ(span->ptr, ptrs[ptrs.size() - 2 - i]);
+        held.push_back(span);
+    }
+
+    for (Span* heldSpan : held) {
+        PageCache::getInstance().deallocate(heldSpan);
+    }
+}
+
+TEST(MemoryPoolTest, ScavengerCanReturnWholeChunkToOS) {
+    auto held = ReserveFullPageCacheSpans();
+    ASSERT_EQ(held.size(), kPageCacheDrainSpanCount);
+
+    std::array<void*, 9> ptrs{};
+    for (size_t i = 0; i < ptrs.size(); ++i) {
+        ptrs[i] = held.back()->ptr;
+        PageCache::getInstance().deallocate(held.back());
+        held.pop_back();
+    }
+
+    EXPECT_EQ(RadixTreePageMap::getInstance().getSpan(reinterpret_cast<std::uintptr_t>(ptrs.back())), nullptr);
+
+    for (Span* heldSpan : held) {
+        PageCache::getInstance().deallocate(heldSpan);
+    }
 }

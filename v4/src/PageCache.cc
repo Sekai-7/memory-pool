@@ -1,5 +1,6 @@
 #include "PageCache.h"
 
+#include <algorithm>
 #include <sys/mman.h>
 #include <limits>
 
@@ -74,6 +75,10 @@ Span* createSpanFromOS(size_t pageCount, bool isFree, bool isDirect) {
     span->objSize = 0;
     span->isFree = isFree;
     span->isDirect = isDirect;
+    span->isReleasedToOS = false;
+    span->isOsChunkHead = !isDirect;
+    span->osChunkPtr = ptr;
+    span->osChunkPageCount = pageCount;
     span->useCount = 0;
     span->freeList = nullptr;
 
@@ -87,6 +92,116 @@ Span* createSpanFromOS(size_t pageCount, bool isFree, bool isDirect) {
 }
 
 } // namespace
+
+void PageCache::pushFreeSpan(Span* span) {
+    if (span == nullptr) {
+        return;
+    }
+    spanLists_[span->pageCount - 1].pushFront(span);
+    freePages_ += span->pageCount;
+    if (span->isReleasedToOS) {
+        releasedPages_ += span->pageCount;
+    }
+}
+
+void PageCache::removeFreeSpan(Span* span) {
+    if (span == nullptr) {
+        return;
+    }
+    spanLists_[span->pageCount - 1].remove(span);
+    freePages_ -= span->pageCount;
+    if (span->isReleasedToOS) {
+        releasedPages_ -= span->pageCount;
+    }
+}
+
+void PageCache::refreshOsChunkHead(Span* span) {
+    if (span == nullptr || span->isDirect) {
+        return;
+    }
+    span->isOsChunkHead = (span->ptr == span->osChunkPtr) && (span->pageCount == span->osChunkPageCount);
+}
+
+bool PageCache::releaseSpanToOS(Span* span) {
+    if (span == nullptr || span->isDirect || span->isReleasedToOS || span->pageCount < kMinReleaseSpanPages) {
+        return false;
+    }
+
+    size_t byteCount = 0;
+    if (!checkedPageBytes(span->pageCount, byteCount)) {
+        return false;
+    }
+
+    if (madvise(span->ptr, byteCount, MADV_DONTNEED) != 0) {
+        return false;
+    }
+
+    span->isReleasedToOS = true;
+    releasedPages_ += span->pageCount;
+    return true;
+}
+
+bool PageCache::releaseChunkToOS(Span* span) {
+    if (span == nullptr || span->isDirect || !span->isOsChunkHead) {
+        return false;
+    }
+
+    size_t byteCount = 0;
+    if (!checkedPageBytes(span->pageCount, byteCount)) {
+        return false;
+    }
+
+    removeFreeSpan(span);
+    clearSpanMap(span->ptr, span->pageCount);
+    munmap(span->ptr, byteCount);
+    SpanAllocator::getInstance().deallocate(span);
+    return true;
+}
+
+void PageCache::scavenge() {
+    while (freePages_ > releasedPages_ + kScavengeThresholdPages) {
+        bool released = false;
+        for (size_t idx = MAX_PAGES_IN_SPAN; idx-- > 0;) {
+            if ((idx + 1) < kMinReleaseSpanPages) {
+                break;
+            }
+            for (Span* span = spanLists_[idx].front(); span != nullptr; span = spanLists_[idx].next(span)) {
+                if (releaseSpanToOS(span)) {
+                    released = true;
+                    break;
+                }
+            }
+            if (released) {
+                break;
+            }
+        }
+
+        if (!released) {
+            break;
+        }
+    }
+
+    while (freePages_ > kChunkReleaseThresholdPages) {
+        bool releasedChunk = false;
+        for (size_t idx = MAX_PAGES_IN_SPAN; idx-- > 0;) {
+            for (Span* span = spanLists_[idx].front(); span != nullptr;) {
+                Span* next = spanLists_[idx].next(span);
+                if (releaseChunkToOS(span)) {
+                    releasedChunk = true;
+                    break;
+                }
+                span = next;
+            }
+            if (releasedChunk) {
+                break;
+            }
+        }
+
+        if (!releasedChunk) {
+            break;
+        }
+    }
+}
 
 Span* PageCache::allocate(size_t pageCount) {
     if (pageCount == 0) {
@@ -104,37 +219,46 @@ Span* PageCache::allocate(size_t pageCount) {
 
         if (idx < MAX_PAGES_IN_SPAN) {
             auto* ret = spanLists_[idx].front();
-            spanLists_[idx].remove(ret);
+            removeFreeSpan(ret);
+            const bool wasReleasedToOS = ret->isReleasedToOS;
             if (ret->pageCount > pageCount) {
                 Span* splice = SpanAllocator::getInstance().allocate();
                 if (splice == nullptr) {
-                    spanLists_[idx].pushFront(ret);
+                    pushFreeSpan(ret);
                     return nullptr;
                 }
 
                 splice->isDirect = false;
                 splice->isFree = true;
                 splice->objSize = 0;
+                splice->isReleasedToOS = wasReleasedToOS;
                 splice->useCount = 0;
                 splice->freeList = nullptr;
                 splice->prev = nullptr;
                 splice->next = nullptr;
                 splice->pageCount = ret->pageCount - pageCount;
                 splice->ptr = static_cast<std::byte*>(ret->ptr) + pageCount * PAGE_SIZE;
+                splice->osChunkPtr = ret->osChunkPtr;
+                splice->osChunkPageCount = ret->osChunkPageCount;
+                refreshOsChunkHead(splice);
 
                 size_t mappedPages = 0;
                 if (!assignSpanMap(splice->ptr, splice->pageCount, splice, mappedPages)) {
                     restoreSpanMap(splice->ptr, mappedPages, ret);
                     SpanAllocator::getInstance().deallocate(splice);
-                    spanLists_[idx].pushFront(ret);
+                    pushFreeSpan(ret);
                     return nullptr;
                 }
 
                 ret->pageCount = pageCount;
-                spanLists_[splice->pageCount - 1].pushFront(splice);
+                ret->isReleasedToOS = false;
+                refreshOsChunkHead(ret);
+                pushFreeSpan(splice);
             }
+            ret->isReleasedToOS = false;
             ret->isFree = false;
             ret->isDirect = false;
+            refreshOsChunkHead(ret);
             return ret;
         }
     }
@@ -147,7 +271,7 @@ Span* PageCache::allocate(size_t pageCount) {
 
     {
         std::lock_guard<std::mutex> lock(page_mutex_);
-        spanLists_[size - 1].pushFront(ret);
+        pushFreeSpan(ret);
     }
 
     return allocate(pageCount);
@@ -170,15 +294,19 @@ void PageCache::deallocate(Span* span) {
         span->freeList = nullptr;
         span->prev = nullptr;
         span->next = nullptr;
+        span->isReleasedToOS = false;
+        refreshOsChunkHead(span);
 
         while (true) {
             auto preAddr = reinterpret_cast<uintptr_t>(span->ptr) - PAGE_SIZE;
             auto pre = RadixTreePageMap::getInstance().getSpan(preAddr);
-            if (pre == nullptr || pre->isFree == false || pre->isDirect || pre->pageCount + span->pageCount > MAX_PAGES_IN_SPAN) {
+            if (pre == nullptr || pre->isFree == false || pre->isDirect || pre->osChunkPtr != span->osChunkPtr ||
+                pre->osChunkPageCount != span->osChunkPageCount || pre->pageCount + span->pageCount > MAX_PAGES_IN_SPAN) {
                 break;
             }
-            spanLists_[pre->pageCount - 1].remove(pre);
+            removeFreeSpan(pre);
             pre->pageCount += span->pageCount;
+            pre->isReleasedToOS = false;
 
             for (size_t i = 0; i < span->pageCount; ++i) {
                 RadixTreePageMap::getInstance().setSpan(reinterpret_cast<uintptr_t>(span->ptr) + i * PAGE_SIZE, pre);
@@ -186,17 +314,20 @@ void PageCache::deallocate(Span* span) {
 
             SpanAllocator::getInstance().deallocate(span);
             span = pre;
+            refreshOsChunkHead(span);
         }
 
         while (true) {
             auto nextAddr = reinterpret_cast<uintptr_t>(span->ptr) + span->pageCount * PAGE_SIZE;
             auto next = RadixTreePageMap::getInstance().getSpan(nextAddr);
-            if (next == nullptr || next->isFree == false || next->isDirect || next->pageCount + span->pageCount > MAX_PAGES_IN_SPAN) {
+            if (next == nullptr || next->isFree == false || next->isDirect || next->osChunkPtr != span->osChunkPtr ||
+                next->osChunkPageCount != span->osChunkPageCount || next->pageCount + span->pageCount > MAX_PAGES_IN_SPAN) {
                 break;
             }
-            spanLists_[next->pageCount - 1].remove(next);
+            removeFreeSpan(next);
             next->ptr = span->ptr;
             next->pageCount += span->pageCount;
+            next->isReleasedToOS = false;
 
             for (size_t i = 0; i < span->pageCount; ++i) {
                 RadixTreePageMap::getInstance().setSpan(reinterpret_cast<uintptr_t>(span->ptr) + i * PAGE_SIZE, next);
@@ -204,9 +335,12 @@ void PageCache::deallocate(Span* span) {
 
             SpanAllocator::getInstance().deallocate(span);
             span = next;
+            refreshOsChunkHead(span);
         }
 
-        spanLists_[span->pageCount - 1].pushFront(span);
+        refreshOsChunkHead(span);
+        pushFreeSpan(span);
+        scavenge();
     }
     return;
 }

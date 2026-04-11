@@ -28,13 +28,25 @@ public:
     PageCache& operator=(PageCache&&) = delete;
 
 private:
+    static constexpr size_t kScavengeThresholdPages = 4 * MAX_PAGES_IN_SPAN;
+    static constexpr size_t kChunkReleaseThresholdPages = 8 * MAX_PAGES_IN_SPAN;
+    static constexpr size_t kMinReleaseSpanPages = 8;
+
     PageCache() = default;
     ~PageCache() = default;
 
     Span* requestFromOS(size_t);
+    void pushFreeSpan(Span*);
+    void removeFreeSpan(Span*);
+    void refreshOsChunkHead(Span*);
+    bool releaseSpanToOS(Span*);
+    bool releaseChunkToOS(Span*);
+    void scavenge();
 
 private:
     std::array<SpanList, MAX_PAGES_IN_SPAN> spanLists_;
+    size_t freePages_{0};
+    size_t releasedPages_{0};
 
     std::mutex page_mutex_;
 };

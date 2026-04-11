@@ -149,6 +149,10 @@ public:
     size_t objSize{0};          // 切分的目标对象大小 (Size Class)
     bool isFree = true;         // Span当前是否被CentralCache使用
     bool isDirect = false;      // 是否为直通大对象 Span
+    bool isReleasedToOS = false; // 普通空闲 Span 是否已经通过 madvise 归还物理页
+    bool isOsChunkHead = false;  // 是否完整覆盖一个原始 OS chunk
+    void* osChunkPtr{nullptr};   // 原始 OS chunk 起始地址
+    size_t osChunkPageCount{0};  // 原始 OS chunk 页数
     
     size_t useCount{0};         // 核心状态：已分配给 ThreadCache 的对象数量
     std::byte* freeList{nullptr}; // 核心状态：内部尚未分配（或已归还）的空闲对象单向链表
@@ -196,6 +200,13 @@ public:
     // 获取第一个有效的 Span
     Span* front() const {
         return empty() ? nullptr : head_.next;
+    }
+
+    Span* next(Span* span) const {
+        if (span == nullptr || span->next == &head_) {
+            return nullptr;
+        }
+        return span->next;
     }
 
 private:
