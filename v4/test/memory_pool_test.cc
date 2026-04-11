@@ -43,6 +43,19 @@ std::vector<Span*> ReserveFullPageCacheSpans(size_t count = kPageCacheDrainSpanC
     return spans;
 }
 
+constexpr uint16_t referenceListIndex(size_t size) {
+    if (size == 0) {
+        return 0;
+    }
+    if (size <= MAX_SMALL_BYTES) {
+        return static_cast<uint16_t>(align(size) >> 3) - 1;
+    }
+    size_t alignSize = std::bit_ceil(size);
+    uint16_t baseIndex = static_cast<uint16_t>(MAX_SMALL_BYTES / ALIGNLEN);
+    uint16_t shift = 63 - std::countl_zero(alignSize);
+    return baseIndex + shift - 8;
+}
+
 }  // namespace
 
 TEST(MemoryPoolTest, AllocatesSupportedSizeClasses) {
@@ -121,6 +134,47 @@ TEST(MemoryPoolTest, ReusesFreedBlocksWithinThread) {
     ASSERT_NE(second, nullptr);
     EXPECT_EQ(first, second);
     deallocate(second);
+}
+
+TEST(MemoryPoolTest, ThreadCacheKeepsStableLocalReuseWindow) {
+    constexpr size_t kSize = 64;
+    constexpr size_t kCount = 64;
+
+    std::vector<void*> firstRound;
+    firstRound.reserve(kCount);
+    for (size_t i = 0; i < kCount; ++i) {
+        void* ptr = allocate(kSize);
+        ASSERT_NE(ptr, nullptr);
+        firstRound.push_back(ptr);
+    }
+
+    for (void* ptr : firstRound) {
+        deallocate(ptr);
+    }
+
+    std::vector<void*> secondRound;
+    secondRound.reserve(kCount);
+    for (size_t i = 0; i < kCount; ++i) {
+        void* ptr = allocate(kSize);
+        ASSERT_NE(ptr, nullptr);
+        secondRound.push_back(ptr);
+    }
+
+    size_t reuseCount = 0;
+    for (void* ptr : secondRound) {
+        for (void* oldPtr : firstRound) {
+            if (ptr == oldPtr) {
+                ++reuseCount;
+                break;
+            }
+        }
+    }
+
+    EXPECT_GE(reuseCount, kCount / 2);
+
+    for (void* ptr : secondRound) {
+        deallocate(ptr);
+    }
 }
 
 TEST(MemoryPoolTest, SupportsRepeatedAllocationsAndReleases) {
@@ -247,22 +301,48 @@ TEST(MemoryPoolTest, RejectsSizesThatOverflowNormalizationOrPageCount) {
     EXPECT_EQ(allocate(std::numeric_limits<size_t>::max() - ALIGNLEN), nullptr);
 }
 
+TEST(MemoryPoolTest, ListIndexLookupMatchesReferenceMapping) {
+    for (size_t size = 1; size <= MAX_BYTES; ++size) {
+        EXPECT_EQ(getListIndex(size), referenceListIndex(size)) << "size=" << size;
+    }
+}
+
+TEST(MemoryPoolTest, TargetFreeListLookupMatchesPolicy) {
+    for (size_t index = 0; index < FREE_LIST_SIZE; ++index) {
+        const size_t classSize = kClassSizeTable[index];
+        if (classSize == 0) {
+            EXPECT_EQ(getTargetFreeListSizeForIndex(index), 0U) << "index=" << index;
+            continue;
+        }
+        EXPECT_EQ(getTargetFreeListSizeForIndex(index), getTargetFreeListSizeForClassSize(classSize))
+            << "index=" << index << " classSize=" << classSize;
+    }
+}
+
 TEST(MemoryPoolTest, PageCacheSplitRollbackOnSetSpanFailure) {
     SetSpanFailureInjectionGuard guard;
 
-    Span* fullSpan = PageCache::getInstance().allocate(MAX_PAGES_IN_SPAN);
+    auto held = ReserveFullPageCacheSpans();
+    ASSERT_EQ(held.size(), kPageCacheDrainSpanCount);
+
+    Span* fullSpan = held.back();
+    held.pop_back();
     ASSERT_NE(fullSpan, nullptr);
     void* expectedPtr = fullSpan->ptr;
     PageCache::getInstance().deallocate(fullSpan);
 
     failNextNonNullSetSpanAfter(0);
-    EXPECT_EQ(PageCache::getInstance().allocate(1), nullptr);
+    EXPECT_EQ(PageCache::getInstance().allocate(MAX_PAGES_IN_SPAN - 1), nullptr);
 
     Span* recovered = PageCache::getInstance().allocate(MAX_PAGES_IN_SPAN);
     ASSERT_NE(recovered, nullptr);
     EXPECT_EQ(recovered->ptr, expectedPtr);
     EXPECT_EQ(RadixTreePageMap::getInstance().getSpan(reinterpret_cast<std::uintptr_t>(expectedPtr)), recovered);
-    PageCache::getInstance().deallocate(recovered);
+    held.push_back(recovered);
+
+    for (Span* heldSpan : held) {
+        PageCache::getInstance().deallocate(heldSpan);
+    }
 }
 
 TEST(MemoryPoolTest, CentralCacheFetchRollbackOnSetSpanFailure) {
@@ -274,7 +354,7 @@ TEST(MemoryPoolTest, CentralCacheFetchRollbackOnSetSpanFailure) {
     PageCache::getInstance().deallocate(pageSpan);
 
     size_t count = 1;
-    failNextNonNullSetSpanAfter(1);
+    failNextNonNullSetSpanAfter(0);
     EXPECT_EQ(CentralCache::getInstance().allocate(24, count), nullptr);
 
     Span* recovered = PageCache::getInstance().allocate(1);

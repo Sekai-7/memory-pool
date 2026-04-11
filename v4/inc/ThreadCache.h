@@ -15,7 +15,7 @@ public:
         return instance;
     }
 
-    void* allocate(size_t size);
+    void* allocate(size_t normalizedSize);
     void deallocate(void* ptr);
 
 public:
@@ -24,16 +24,12 @@ public:
     ThreadCache(ThreadCache&&) = delete;
     ThreadCache& operator=(ThreadCache&&) = delete;
 
-private:
-    ThreadCache() {
-        threshold_.fill(DEFAULT_THRESHOLD);
-    };
+    ThreadCache() = default;
     ~ThreadCache();
 
 private:
     std::array<std::byte*, FREE_LIST_SIZE> freeList_ = {};
     std::array<size_t, FREE_LIST_SIZE> freeListSize_ = {};
-    std::array<size_t, FREE_LIST_SIZE> threshold_ = {};
 };
 
 }

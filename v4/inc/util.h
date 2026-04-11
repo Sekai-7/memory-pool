@@ -2,6 +2,7 @@
 #define _UTIL_H_
 
 #include <sys/mman.h>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <atomic>
@@ -51,7 +52,7 @@ inline constexpr bool normalizeSizeChecked(size_t size, size_t& normalizedSize) 
     return true;
 }
 
-inline constexpr uint16_t getListIndex(size_t size) noexcept {
+inline constexpr uint16_t computeListIndex(size_t size) noexcept {
     if (size == 0) {
         return 0;
     }
@@ -64,7 +65,73 @@ inline constexpr uint16_t getListIndex(size_t size) noexcept {
     return baseIndex + shift - 8;
 }
 
-constexpr size_t FREE_LIST_SIZE = getListIndex(MAX_BYTES) + 1;
+constexpr size_t FREE_LIST_SIZE = computeListIndex(MAX_BYTES) + 1;
+constexpr size_t LIST_INDEX_TABLE_SIZE = (MAX_BYTES / ALIGNLEN) + 1;
+
+inline constexpr auto buildListIndexTable() noexcept {
+    std::array<uint16_t, LIST_INDEX_TABLE_SIZE> table{};
+    table[0] = 0;
+    for (size_t i = 1; i < table.size(); ++i) {
+        table[i] = computeListIndex(i * ALIGNLEN);
+    }
+    return table;
+}
+
+inline constexpr auto kListIndexTable = buildListIndexTable();
+
+inline constexpr uint16_t getListIndex(size_t size) noexcept {
+    if (size == 0) {
+        return 0;
+    }
+
+    if (size <= MAX_BYTES) {
+        const size_t normalizedSize = size <= ALIGNLEN ? ALIGNLEN : align(size);
+        return kListIndexTable[normalizedSize / ALIGNLEN];
+    }
+
+    return computeListIndex(size);
+}
+
+inline constexpr auto buildClassSizeTable() noexcept {
+    std::array<size_t, FREE_LIST_SIZE> table{};
+    for (size_t size = ALIGNLEN; size <= MAX_BYTES; size += ALIGNLEN) {
+        const auto index = kListIndexTable[size / ALIGNLEN];
+        if (table[index] == 0) {
+            table[index] = size;
+        }
+    }
+    return table;
+}
+
+inline constexpr auto kClassSizeTable = buildClassSizeTable();
+
+inline constexpr size_t getTargetFreeListSizeForClassSize(size_t classSize) noexcept {
+    if (classSize <= 128) {
+        return 64;
+    }
+    if (classSize <= 1024) {
+        return 32;
+    }
+    if (classSize <= 8192) {
+        return 16;
+    }
+    return 8;
+}
+
+inline constexpr auto buildTargetFreeListSizeTable() noexcept {
+    std::array<size_t, FREE_LIST_SIZE> table{};
+    for (size_t index = 0; index < table.size(); ++index) {
+        const size_t classSize = kClassSizeTable[index];
+        table[index] = classSize == 0 ? 0 : getTargetFreeListSizeForClassSize(classSize);
+    }
+    return table;
+}
+
+inline constexpr auto kTargetFreeListSizeTable = buildTargetFreeListSizeTable();
+
+inline constexpr size_t getTargetFreeListSizeForIndex(size_t index) noexcept {
+    return kTargetFreeListSizeTable[index];
+}
 
 template<typename T, size_t ChunkSize = 64 * 1024>
 class MetaDataAllocator {
