@@ -19,7 +19,7 @@ public:
         return instance;
     }
 
-    std::byte* allocate(size_t size, size_t& count);
+    std::byte* allocate(size_t size, size_t idx, size_t& count);
     void deallocate(std::byte* list_head, size_t size, size_t count);
 
 public:
@@ -41,7 +41,7 @@ private:
     }
     ~CentralCache() = default;
 
-    Span* fetchSpanFromPageCache(size_t objSize);
+    Span* fetchSpanFromPageCache(size_t objSize, size_t index);
 
 private:
     std::array<Bucket, FREE_LIST_SIZE> buckets_;

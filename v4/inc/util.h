@@ -182,6 +182,9 @@ public:
     
     size_t useCount{0};         // 核心状态：已分配给 ThreadCache 的对象数量
     std::byte* freeList{nullptr}; // 核心状态：内部尚未分配（或已归还）的空闲对象单向链表
+
+    // 性能开销过大，缓存一下
+    size_t classSizeIndex{FREE_LIST_SIZE};
     
     // 侵入式双向链表指针
     Span* prev{nullptr};

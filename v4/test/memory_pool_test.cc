@@ -343,7 +343,7 @@ TEST(MemoryPoolTest, CentralCacheFetchRollbackOnSetSpanFailure) {
 
     size_t count = 1;
     failNextNonNullSetSpanAfter(0);
-    EXPECT_EQ(CentralCache::getInstance().allocate(24, count), nullptr);
+    EXPECT_EQ(CentralCache::getInstance().allocate(24, getListIndex(24), count), nullptr);
 
     Span* recovered = PageCache::getInstance().allocate(1);
     ASSERT_NE(recovered, nullptr);

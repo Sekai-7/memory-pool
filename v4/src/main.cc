@@ -5,7 +5,11 @@
 using namespace memorypool;
 
 int main() {
-    void* size = allocate(10);
-    deallocate(size);
+    uintptr_t sum = 0;
+    for (int i = 0; i < 100000000; ++i) {
+        auto* ptr = allocate(10);
+        sum += reinterpret_cast<std::uintptr_t>(ptr) & 1;
+        deallocate(ptr);
+    }
     return 0;
 }

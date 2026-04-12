@@ -81,6 +81,7 @@ Span* createSpanFromOS(size_t pageCount, bool isFree, bool isDirect) {
     span->osChunkPageCount = pageCount;
     span->useCount = 0;
     span->freeList = nullptr;
+    span->classSizeIndex = FREE_LIST_SIZE;
 
     if (!registerSpanMap(span)) {
         munmap(ptr, byteCount);
@@ -231,6 +232,7 @@ Span* PageCache::allocate(size_t pageCount) {
                 splice->isDirect = false;
                 splice->isFree = true;
                 splice->objSize = 0;
+                splice->classSizeIndex = FREE_LIST_SIZE;
                 splice->isReleasedToOS = wasReleasedToOS;
                 splice->useCount = 0;
                 splice->freeList = nullptr;
@@ -290,6 +292,7 @@ void PageCache::deallocate(Span* span) {
         std::lock_guard<std::mutex> lock(page_mutex_);
         span->isFree = true;
         span->objSize = 0;
+        span->classSizeIndex = FREE_LIST_SIZE;
         span->useCount = 0;
         span->freeList = nullptr;
         span->prev = nullptr;

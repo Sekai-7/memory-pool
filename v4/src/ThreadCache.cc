@@ -26,7 +26,7 @@ void* ThreadCache::allocate(size_t normalizedSize) {
         
         // 从CentralCache申请内存并且分割
         // 中心缓存的分配采取尽力
-        auto* applyMemory = CentralCache::getInstance().allocate(normalizedSize, count);
+        auto* applyMemory = CentralCache::getInstance().allocate(normalizedSize, index, count);
         
         if (applyMemory == nullptr) {
             return nullptr;
@@ -63,7 +63,7 @@ void ThreadCache::deallocate(void* ptr) {
 
     size_t size = span->objSize;
 
-    auto index = getListIndex(size);
+    auto index = span->classSizeIndex;
 
     if (index >= FREE_LIST_SIZE || size == 0) {
         return;

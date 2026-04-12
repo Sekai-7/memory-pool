@@ -33,12 +33,10 @@ void unlockBucket(std::atomic_flag& lock) {
 
 }
 
-std::byte* CentralCache::allocate(size_t size, size_t& count) {
-    size_t alignSize = 0;
-    if (!normalizeSizeChecked(size, alignSize)) {
-        return nullptr;
-    }
-    auto index = getListIndex(alignSize);
+std::byte* CentralCache::allocate(size_t size, size_t idx, size_t& count) {
+    size_t alignSize = size;
+
+    auto index = idx;
 
     if (index >= FREE_LIST_SIZE) {
         return nullptr;
@@ -51,7 +49,7 @@ std::byte* CentralCache::allocate(size_t size, size_t& count) {
     if (span == nullptr) {
         unlockBucket(bucket.lock);
 
-        span = fetchSpanFromPageCache(alignSize);
+        span = fetchSpanFromPageCache(alignSize, index);
 
         if (span == nullptr) {
             return nullptr;
@@ -139,7 +137,7 @@ void CentralCache::deallocate(std::byte* listHead, size_t idx, size_t count) {
     return;
 }
 
-Span* CentralCache::fetchSpanFromPageCache(size_t objSize) {
+Span* CentralCache::fetchSpanFromPageCache(size_t objSize, size_t index) {
     size_t targetObjects = kTargetSpanBytes / objSize;
     if (targetObjects == 0) {
         targetObjects = 1;
@@ -176,6 +174,7 @@ Span* CentralCache::fetchSpanFromPageCache(size_t objSize) {
     span->isDirect = false;
     span->isFree = false;
     span->freeList = head;
+    span->classSizeIndex = index; 
 
     for (size_t i = 1; i < objectCount; ++i) {
         auto* next = current + objSize;
