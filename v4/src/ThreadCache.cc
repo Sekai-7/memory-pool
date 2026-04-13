@@ -9,31 +9,29 @@
 namespace memorypool {
 
 void ThreadCache::refillFromCentralCache(size_t normalizedSize, size_t index) {
-    if (threshold_[index] == 0) {
-        threshold_[index] = DEFAULT_THRESHOLD;
-    }
-
-    size_t count = threshold_[index];
+    auto& bucket = buckets_[index];
+    size_t count = bucket.threshold;
     auto* applyMemory = CentralCache::getInstance().allocate(normalizedSize, index, count);
     if (applyMemory == nullptr) {
         return;
     }
 
-    freeList_[index] = applyMemory;
-    freeListSize_[index] = count;
+    bucket.freeList = applyMemory;
+    bucket.freeListSize = count;
 
-    if (threshold_[index] <= std::numeric_limits<size_t>::max() / 2) {
-        threshold_[index] *= 2;
+    if (bucket.threshold <= std::numeric_limits<size_t>::max() / 2) {
+        bucket.threshold *= 2;
     }
 }
 
 void ThreadCache::flushHalfToCentralCache(size_t index) {
-    const size_t deallocateSize = freeListSize_[index] / 2;
+    auto& bucket = buckets_[index];
+    const size_t deallocateSize = bucket.freeListSize / 2;
     if (deallocateSize == 0) {
         return;
     }
 
-    std::byte* listHead = freeList_[index];
+    std::byte* listHead = bucket.freeList;
     std::byte* listTail = listHead;
     for (size_t i = 1; i < deallocateSize; ++i) {
         if (listTail == nullptr) {
@@ -48,9 +46,9 @@ void ThreadCache::flushHalfToCentralCache(size_t index) {
     std::byte* remaining = *(reinterpret_cast<std::byte**>(listTail));
     *reinterpret_cast<std::byte**>(listTail) = nullptr;
     CentralCache::getInstance().deallocate(listHead, index, deallocateSize);
-    freeList_[index] = remaining;
-    freeListSize_[index] -= deallocateSize;
-    threshold_[index] = threshold_[index] / 2 < DEFAULT_THRESHOLD ? DEFAULT_THRESHOLD : threshold_[index] / 2;
+    bucket.freeList = remaining;
+    bucket.freeListSize -= deallocateSize;
+    bucket.threshold = bucket.threshold / 2 < DEFAULT_THRESHOLD ? DEFAULT_THRESHOLD : bucket.threshold / 2;
 }
 
 void* ThreadCache::allocate(size_t normalizedSize) {
@@ -63,16 +61,17 @@ void* ThreadCache::allocate(size_t normalizedSize) {
         return nullptr;
     }
 
-    if (freeList_[index] == nullptr) {
+    auto& bucket = buckets_[index];
+    if (bucket.freeList == nullptr) {
         refillFromCentralCache(normalizedSize, index);
-        if (freeList_[index] == nullptr) {
+        if (bucket.freeList == nullptr) {
             return nullptr;
         }
     }
 
-    void* ret = static_cast<void*>(freeList_[index]);
-    freeList_[index] = *(reinterpret_cast<std::byte**>(ret));
-    freeListSize_[index]--;
+    void* ret = static_cast<void*>(bucket.freeList);
+    bucket.freeList = *(reinterpret_cast<std::byte**>(ret));
+    bucket.freeListSize--;
 
     return ret;
 }
@@ -87,23 +86,18 @@ void ThreadCache::deallocate(void* ptr, Span* span) {
         return;
     }
 
-    size_t size = span->objSize;
-
     auto index = span->classSizeIndex;
 
-    if (index >= FREE_LIST_SIZE || size == 0) {
+    if (index >= FREE_LIST_SIZE || span->objSize == 0) {
         return;
     }
 
-    *(reinterpret_cast<std::byte**>(ptr)) = freeList_[index];
-    freeList_[index] = static_cast<std::byte*>(ptr);
-    freeListSize_[index]++;
+    auto& bucket = buckets_[index];
+    *(reinterpret_cast<std::byte**>(ptr)) = bucket.freeList;
+    bucket.freeList = static_cast<std::byte*>(ptr);
+    bucket.freeListSize++;
 
-    if (threshold_[index] == 0) {
-        threshold_[index] = DEFAULT_THRESHOLD;
-    }
-
-    if (freeListSize_[index] >= threshold_[index]) {
+    if (bucket.freeListSize >= bucket.threshold) {
         flushHalfToCentralCache(index);
     }
 
@@ -112,8 +106,9 @@ void ThreadCache::deallocate(void* ptr, Span* span) {
 
 ThreadCache::~ThreadCache() {
     for (size_t i = 0; i < FREE_LIST_SIZE; ++i) {
-        if (freeList_[i] != nullptr) {
-            CentralCache::getInstance().deallocate(freeList_[i], i, freeListSize_[i]);
+        auto& bucket = buckets_[i];
+        if (bucket.freeList != nullptr) {
+            CentralCache::getInstance().deallocate(bucket.freeList, i, bucket.freeListSize);
         }
     }
     return;

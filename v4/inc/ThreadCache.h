@@ -29,14 +29,20 @@ private:
     void flushHalfToCentralCache(size_t index);
 
     ThreadCache() {
-        threshold_.fill(DEFAULT_THRESHOLD);
+        for (auto& bucket : buckets_) {
+            bucket.threshold = DEFAULT_THRESHOLD;
+        }
     }
     ~ThreadCache();
 
 private:
-    std::array<std::byte*, FREE_LIST_SIZE> freeList_ = {};
-    std::array<size_t, FREE_LIST_SIZE> freeListSize_ = {};
-    std::array<size_t, FREE_LIST_SIZE> threshold_ = {};
+    struct LocalBucket {
+        std::byte* freeList = nullptr;
+        size_t freeListSize = 0;
+        size_t threshold = DEFAULT_THRESHOLD;
+    };
+
+    std::array<LocalBucket, FREE_LIST_SIZE> buckets_ = {};
 };
 
 }
