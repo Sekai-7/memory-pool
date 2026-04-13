@@ -104,22 +104,6 @@ bool RadixTreePageMap::setSpan(uintptr_t key, Span* span) {
     return true;
 }
 
-Span* RadixTreePageMap::getSpan(uintptr_t key) {
-    auto pageId = key >> PAGE_SHIFT;
-
-    size_t i1 = (pageId >> (BITS_PER_LEVEL * 2)) & (LEVEL_LENGTH - 1);
-    size_t i2 = (pageId >> BITS_PER_LEVEL) & (LEVEL_LENGTH - 1);
-    size_t i3 = pageId & (LEVEL_LENGTH - 1);
-
-    Node* node = root_[i1].load(std::memory_order_acquire);
-    if (!node) return nullptr;
-
-    LeafNode* leaf = node->leaves[i2].load(std::memory_order_acquire);
-    if (!leaf) return nullptr;
-
-    return leaf->spans[i3].load(std::memory_order_acquire);
-}
-
 }
 
 #endif

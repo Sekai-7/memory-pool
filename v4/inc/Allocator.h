@@ -38,7 +38,7 @@ namespace memorypool {
             return;
         }
 
-        ThreadCache::getInstance().deallocate(ptr);
+        ThreadCache::getInstance().deallocate(ptr, span);
     }
 }
 

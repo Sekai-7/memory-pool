@@ -8,6 +8,51 @@
 
 namespace memorypool {
 
+void ThreadCache::refillFromCentralCache(size_t normalizedSize, size_t index) {
+    if (threshold_[index] == 0) {
+        threshold_[index] = DEFAULT_THRESHOLD;
+    }
+
+    size_t count = threshold_[index];
+    auto* applyMemory = CentralCache::getInstance().allocate(normalizedSize, index, count);
+    if (applyMemory == nullptr) {
+        return;
+    }
+
+    freeList_[index] = applyMemory;
+    freeListSize_[index] = count;
+
+    if (threshold_[index] <= std::numeric_limits<size_t>::max() / 2) {
+        threshold_[index] *= 2;
+    }
+}
+
+void ThreadCache::flushHalfToCentralCache(size_t index) {
+    const size_t deallocateSize = freeListSize_[index] / 2;
+    if (deallocateSize == 0) {
+        return;
+    }
+
+    std::byte* listHead = freeList_[index];
+    std::byte* listTail = listHead;
+    for (size_t i = 1; i < deallocateSize; ++i) {
+        if (listTail == nullptr) {
+            return;
+        }
+        listTail = *(reinterpret_cast<std::byte**>(listTail));
+    }
+    if (listTail == nullptr) {
+        return;
+    }
+
+    std::byte* remaining = *(reinterpret_cast<std::byte**>(listTail));
+    *reinterpret_cast<std::byte**>(listTail) = nullptr;
+    CentralCache::getInstance().deallocate(listHead, index, deallocateSize);
+    freeList_[index] = remaining;
+    freeListSize_[index] -= deallocateSize;
+    threshold_[index] = threshold_[index] / 2 < DEFAULT_THRESHOLD ? DEFAULT_THRESHOLD : threshold_[index] / 2;
+}
+
 void* ThreadCache::allocate(size_t normalizedSize) {
     if (normalizedSize == 0) {
         return nullptr;
@@ -19,24 +64,9 @@ void* ThreadCache::allocate(size_t normalizedSize) {
     }
 
     if (freeList_[index] == nullptr) {
-        if (threshold_[index] == 0) {
-            threshold_[index] = DEFAULT_THRESHOLD;
-        }
-        size_t count = threshold_[index];
-        
-        // 从CentralCache申请内存并且分割
-        // 中心缓存的分配采取尽力
-        auto* applyMemory = CentralCache::getInstance().allocate(normalizedSize, index, count);
-        
-        if (applyMemory == nullptr) {
+        refillFromCentralCache(normalizedSize, index);
+        if (freeList_[index] == nullptr) {
             return nullptr;
-        }
-
-        freeList_[index] = applyMemory;
-        freeListSize_[index] = count;
-
-        if (threshold_[index] <= std::numeric_limits<size_t>::max() / 2) {
-            threshold_[index] *= 2;
         }
     }
 
@@ -47,12 +77,8 @@ void* ThreadCache::allocate(size_t normalizedSize) {
     return ret;
 }
 
-void ThreadCache::deallocate(void* ptr) {
-    if (ptr == nullptr) {
-        return;
-    }
-    Span* span = RadixTreePageMap::getInstance().getSpan(reinterpret_cast<uintptr_t>(ptr));
-    if (span == nullptr) {
+void ThreadCache::deallocate(void* ptr, Span* span) {
+    if (ptr == nullptr || span == nullptr) {
         return;
     }
 
@@ -78,28 +104,7 @@ void ThreadCache::deallocate(void* ptr) {
     }
 
     if (freeListSize_[index] >= threshold_[index]) {
-        size_t deallocateSize = freeListSize_[index] / 2;
-        std::byte* listHead = freeList_[index];
-        std::byte* listTail = listHead;
-        if (deallocateSize == 0) {
-            return;
-        }
-        for (size_t i = 1; i < deallocateSize; ++i) {
-            if (listTail == nullptr) {
-                return;
-            }
-            listTail = *(reinterpret_cast<std::byte**>(listTail));
-        }
-        if (listTail == nullptr) {
-            return;
-        }
-
-        std::byte* remaining = *(reinterpret_cast<std::byte**>(listTail));
-        *reinterpret_cast<std::byte**>(listTail) = nullptr;
-        CentralCache::getInstance().deallocate(listHead, index, deallocateSize);
-        freeList_[index] = remaining;
-        freeListSize_[index] -= deallocateSize;
-        threshold_[index] = threshold_[index] / 2 < DEFAULT_THRESHOLD ? DEFAULT_THRESHOLD : threshold_[index] / 2;
+        flushHalfToCentralCache(index);
     }
 
     return;

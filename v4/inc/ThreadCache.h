@@ -16,7 +16,7 @@ public:
     }
 
     void* allocate(size_t normalizedSize);
-    void deallocate(void* ptr);
+    void deallocate(void* ptr, Span* span);
 
 public:
     ThreadCache(const ThreadCache&) = delete;
@@ -25,6 +25,9 @@ public:
     ThreadCache& operator=(ThreadCache&&) = delete;
 
 private:
+    void refillFromCentralCache(size_t normalizedSize, size_t index);
+    void flushHalfToCentralCache(size_t index);
+
     ThreadCache() {
         threshold_.fill(DEFAULT_THRESHOLD);
     }

@@ -12,6 +12,12 @@
 
 namespace memorypool {
 
+#if defined(__GNUC__) || defined(__clang__)
+#define MEMORY_POOL_ALWAYS_INLINE inline __attribute__((always_inline))
+#else
+#define MEMORY_POOL_ALWAYS_INLINE inline
+#endif
+
 constexpr size_t MAX_PAGES = 128;
 
 constexpr size_t ALIGNLEN = sizeof(void*);
@@ -280,7 +286,24 @@ public:
     }
 
     bool setSpan(uintptr_t, Span*);
-    Span* getSpan(uintptr_t);
+    MEMORY_POOL_ALWAYS_INLINE Span* getSpan(uintptr_t key) {
+        const auto pageId = key >> PAGE_SHIFT;
+
+        const size_t i1 = (pageId >> (BITS_PER_LEVEL * 2)) & (LEVEL_LENGTH - 1);
+        Node* node = root_[i1].load(std::memory_order_acquire);
+        if (node == nullptr) {
+            return nullptr;
+        }
+
+        const size_t i2 = (pageId >> BITS_PER_LEVEL) & (LEVEL_LENGTH - 1);
+        LeafNode* leaf = node->leaves[i2].load(std::memory_order_acquire);
+        if (leaf == nullptr) {
+            return nullptr;
+        }
+
+        const size_t i3 = pageId & (LEVEL_LENGTH - 1);
+        return leaf->spans[i3].load(std::memory_order_acquire);
+    }
 
 private:
     RadixTreePageMap() {
