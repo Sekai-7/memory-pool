@@ -25,7 +25,7 @@ public:
     ThreadCache& operator=(ThreadCache&&) = delete;
 
 private:
-    void refillFromCentralCache(size_t normalizedSize, size_t index);
+    void refillFromCentralCache(size_t classSize, size_t index);
     void flushHalfToCentralCache(size_t index);
 
     ThreadCache() {

@@ -68,7 +68,7 @@ inline constexpr uint16_t computeListIndex(size_t size) noexcept {
     size_t alignSize = std::bit_ceil(size);
     uint16_t baseIndex = static_cast<uint16_t>(MAX_SMALL_BYTES / ALIGNLEN);
     uint16_t shift = 63 - std::countl_zero(alignSize);
-    return baseIndex + shift - 8;
+    return baseIndex + shift - 9;
 }
 
 constexpr size_t FREE_LIST_SIZE = computeListIndex(MAX_BYTES) + 1;
@@ -85,6 +85,19 @@ inline constexpr auto buildListIndexTable() noexcept {
 
 inline constexpr auto kListIndexTable = buildListIndexTable();
 
+inline constexpr auto buildClassSizeTable() noexcept {
+    std::array<size_t, FREE_LIST_SIZE> table{};
+    for (size_t size = ALIGNLEN; size <= MAX_SMALL_BYTES; size += ALIGNLEN) {
+        table[computeListIndex(size)] = size;
+    }
+    for (size_t size = MAX_SMALL_BYTES * 2; size <= MAX_BYTES; size *= 2) {
+        table[computeListIndex(size)] = size;
+    }
+    return table;
+}
+
+inline constexpr auto kClassSizeTable = buildClassSizeTable();
+
 inline constexpr uint16_t getListIndex(size_t size) noexcept {
     if (size == 0) {
         return 0;
@@ -96,6 +109,10 @@ inline constexpr uint16_t getListIndex(size_t size) noexcept {
     }
 
     return computeListIndex(size);
+}
+
+inline constexpr size_t getClassSize(size_t index) noexcept {
+    return index < FREE_LIST_SIZE ? kClassSizeTable[index] : 0;
 }
 
 template<typename T, size_t ChunkSize = 64 * 1024>

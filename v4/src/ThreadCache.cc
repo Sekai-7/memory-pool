@@ -8,10 +8,10 @@
 
 namespace memorypool {
 
-void ThreadCache::refillFromCentralCache(size_t normalizedSize, size_t index) {
+void ThreadCache::refillFromCentralCache(size_t classSize, size_t index) {
     auto& bucket = buckets_[index];
     size_t count = bucket.threshold;
-    auto* applyMemory = CentralCache::getInstance().allocate(normalizedSize, index, count);
+    auto* applyMemory = CentralCache::getInstance().allocate(classSize, index, count);
     if (applyMemory == nullptr) {
         return;
     }
@@ -63,7 +63,11 @@ void* ThreadCache::allocate(size_t normalizedSize) {
 
     auto& bucket = buckets_[index];
     if (bucket.freeList == nullptr) {
-        refillFromCentralCache(normalizedSize, index);
+        const size_t classSize = getClassSize(index);
+        if (classSize == 0) {
+            return nullptr;
+        }
+        refillFromCentralCache(classSize, index);
         if (bucket.freeList == nullptr) {
             return nullptr;
         }

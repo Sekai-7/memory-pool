@@ -1,5 +1,7 @@
 ## v4 Build Modes
 
+完整设计说明见：[v4/docs/design.md](/home/ubuntu/memory-pool/v4/docs/design.md)
+
 `v4` 现在支持一个统一的 CMake 参数：`MEMORY_POOL_BUILD_MODE`。
 
 - `PERF`

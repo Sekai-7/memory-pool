@@ -53,7 +53,7 @@ constexpr uint16_t referenceListIndex(size_t size) {
     size_t alignSize = std::bit_ceil(size);
     uint16_t baseIndex = static_cast<uint16_t>(MAX_SMALL_BYTES / ALIGNLEN);
     uint16_t shift = 63 - std::countl_zero(alignSize);
-    return baseIndex + shift - 8;
+    return baseIndex + shift - 9;
 }
 
 }  // namespace
@@ -304,6 +304,49 @@ TEST(MemoryPoolTest, RejectsSizesThatOverflowNormalizationOrPageCount) {
 TEST(MemoryPoolTest, ListIndexLookupMatchesReferenceMapping) {
     for (size_t size = 1; size <= MAX_BYTES; ++size) {
         EXPECT_EQ(getListIndex(size), referenceListIndex(size)) << "size=" << size;
+    }
+}
+
+TEST(MemoryPoolTest, ClassSizeLookupCoversEveryListIndex) {
+    for (size_t index = 0; index < FREE_LIST_SIZE; ++index) {
+        const size_t classSize = getClassSize(index);
+        ASSERT_NE(classSize, 0U) << "index=" << index;
+        EXPECT_EQ(getListIndex(classSize), index) << "classSize=" << classSize;
+    }
+}
+
+TEST(MemoryPoolTest, ClassSizeIsLargeEnoughForEveryPooledRequest) {
+    for (size_t size = 1; size <= MAX_BYTES; ++size) {
+        size_t normalizedSize = 0;
+        ASSERT_TRUE(normalizeSizeChecked(size, normalizedSize)) << "size=" << size;
+        const size_t classSize = getClassSize(getListIndex(normalizedSize));
+        EXPECT_GE(classSize, normalizedSize) << "size=" << size;
+    }
+}
+
+TEST(MemoryPoolTest, CoarseBucketsSplitSpansByStandardClassSize) {
+    struct Case {
+        size_t requestSize;
+        size_t classSize;
+    };
+
+    constexpr std::array<Case, 3> cases{{
+        {MAX_SMALL_BYTES + 1, 512},
+        {512 + 1, 1024},
+        {1024 + 1, 2048},
+    }};
+
+    for (const auto& testCase : cases) {
+        void* ptr = allocate(testCase.requestSize);
+        ASSERT_NE(ptr, nullptr) << "requestSize=" << testCase.requestSize;
+
+        Span* span = RadixTreePageMap::getInstance().getSpan(reinterpret_cast<std::uintptr_t>(ptr));
+        ASSERT_NE(span, nullptr) << "requestSize=" << testCase.requestSize;
+        EXPECT_EQ(span->objSize, testCase.classSize) << "requestSize=" << testCase.requestSize;
+        EXPECT_EQ(getClassSize(span->classSizeIndex), testCase.classSize)
+            << "requestSize=" << testCase.requestSize;
+
+        deallocate(ptr);
     }
 }
 
